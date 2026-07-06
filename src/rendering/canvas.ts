@@ -3,10 +3,9 @@ import {
   HERO_CHAIN, CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, HUD_HEIGHT,
   COLOR_BACKGROUND, COLOR_CONTAINER_GRADIENT_TOP, COLOR_CONTAINER_GRADIENT_BOTTOM,
   COLOR_CONTAINER_BORDER, COLOR_HUD_BG, COLOR_ACCENT, COLOR_WHITE,
-  FONT_STACK, getFontSize, getHeroImagePath, type HeroDefinition,
+  FONT_STACK, getFontSize, getHeroImagePath, type HeroDefinition, type Particle,
 } from '../constants';
 import { getHeroBodies } from '../engine/physics';
-import type { Particle } from './animations';
 
 // ---------------------------------------------------------------------------
 // Image cache
@@ -156,7 +155,7 @@ export function renderHeroBodies(
 export function renderParticles(ctx: CanvasRenderingContext2D, particles: Particle[], containerOffsetX: number, containerOffsetY: number): void {
   for (const p of particles) {
     ctx.save();
-    ctx.globalAlpha = p.maxLife > 0 ? p.life / p.maxLife : 0;
+    ctx.globalAlpha = p.maxLife > 0 ? 1 - p.life / p.maxLife : 0;
     ctx.beginPath();
     ctx.arc(p.x + containerOffsetX, p.y + containerOffsetY, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = p.color;
@@ -173,6 +172,7 @@ export interface HUDData {
   score: number;
   highScore: number;
   nextTier: number;
+  isMuted?: boolean;
 }
 
 export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
