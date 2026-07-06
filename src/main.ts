@@ -114,6 +114,9 @@ function gameLoop(timestamp: number): void {
   Matter.Engine.update(engine, delta);
   for (const body of Matter.Composite.allBodies(engine.world)) {
     clampBodyVelocity(body);
+    // Kill micro-creep: if body is nearly at rest, stop it
+    if (Math.abs(body.velocity.x) < 0.1) Matter.Body.setVelocity(body, { x: 0, y: body.velocity.y });
+    if (Math.abs(body.velocity.y) < 0.1) Matter.Body.setVelocity(body, { x: body.velocity.x, y: 0 });
   }
 
   // Process merges

@@ -9,7 +9,7 @@ export const WALL_CATEGORY = 0x0002;
 export function createPhysicsEngine(): Matter.Engine {
   const engine = Engine.create({
     gravity: { x: 0, y: GRAVITY, scale: 0.001 },
-    enableSleeping: false,
+    enableSleeping: true,
   });
 
   const wallOpts: Matter.IChamferableBodyDefinition = {

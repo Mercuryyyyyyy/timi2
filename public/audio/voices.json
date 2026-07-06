@@ -13,11 +13,7 @@
       "2.mp3",
       "3.wav",
       "4.wav",
-      "5.wav",
-      "6.wav",
-      "7.wav",
-      "8.wav",
-      "9.wav"
+      "5.wav"
     ]
   },
   "ganjiangmoxie": {
@@ -37,7 +33,8 @@
     "files": [
       "1.wav",
       "2.wav",
-      "3.wav"
+      "3.wav",
+      "betray.wav"
     ]
   },
   "yunying": {
@@ -49,6 +46,11 @@
       "5.wav",
       "6.wav",
       "7.wav"
+    ]
+  },
+  "hainuo": {
+    "files": [
+      "1.wav"
     ]
   },
   "yuji": {
