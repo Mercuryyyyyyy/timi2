@@ -3,7 +3,7 @@ import {
   HERO_CHAIN, CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, HUD_HEIGHT,
   COLOR_BACKGROUND, COLOR_CONTAINER_GRADIENT_TOP, COLOR_CONTAINER_GRADIENT_BOTTOM,
   COLOR_CONTAINER_BORDER, COLOR_HUD_BG, COLOR_ACCENT, COLOR_WHITE,
-  FONT_STACK, getFontSize, getHeroImagePath, type Particle,
+  FONT_STACK, getHeroImagePath, type Particle,
 } from '../constants';
 import { getHeroBodies } from '../engine/physics';
 
@@ -11,37 +11,33 @@ import { getHeroBodies } from '../engine/physics';
 // Image cache
 // ---------------------------------------------------------------------------
 
-const IMAGE_EXTENSIONS = ['.png', '.jpg'] as const;
+// Simple image cache — load on first use
+const heroImageCache = new Map<string, HTMLImageElement>();
 
-const imageCache = new Map<string, HTMLImageElement>();
-
-/** Preload all hero images. Returns a Promise that resolves when all are loaded (or failed). */
-export async function preloadHeroImages(): Promise<void> {
-  const promises: Promise<void>[] = [];
-  for (const hero of HERO_CHAIN) {
-    const basePath = getHeroImagePath(hero.tier, hero.nameEn);
-    for (const ext of IMAGE_EXTENSIONS) {
-      const fullPath = basePath + ext;
-      promises.push(new Promise<void>((resolve) => {
-        const img = new Image();
-        img.onload = () => { imageCache.set(fullPath, img); resolve(); };
-        img.onerror = () => { resolve(); }; // Silently skip missing extensions
-        img.src = fullPath;
-      }));
-    }
-  }
-  await Promise.all(promises);
-}
-
-/** Get a hero image from cache. Returns null if not loaded. */
-function getHeroImage(tier: number, nameEn: string): HTMLImageElement | null {
+function getHeroImg(tier: number, nameEn: string): HTMLImageElement | null {
   const basePath = getHeroImagePath(tier, nameEn);
-  for (const ext of IMAGE_EXTENSIONS) {
-    const fullPath = basePath + ext;
-    const img = imageCache.get(fullPath);
-    if (img && img.complete && img.naturalWidth > 0) return img;
+  // Try .jpg first (most common), then .png
+  for (const ext of ['.jpg', '.png']) {
+    const key = basePath + ext;
+    let img = heroImageCache.get(key);
+    if (!img) {
+      img = new Image();
+      img.src = key;
+      heroImageCache.set(key, img);
+    }
+    if (img.complete && img.naturalWidth > 0) return img;
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Merge animation
+// ---------------------------------------------------------------------------
+
+const mergeAnimations = new Map<number, { startTime: number; duration: number }>();
+
+export function animateMerge(bodyId: number): void {
+  mergeAnimations.set(bodyId, { startTime: performance.now(), duration: 250 });
 }
 
 // ---------------------------------------------------------------------------
@@ -114,17 +110,34 @@ export function renderHeroBodies(
     if (!heroDef) continue;
 
     const r = heroDef.radius;
-    const img = getHeroImage(tier, heroDef.nameEn);
+    const img = getHeroImg(tier, heroDef.nameEn);
+
+    // Merge squish animation scale
+    let scale = 1;
+    const anim = mergeAnimations.get(body.id);
+    if (anim) {
+      const elapsed = performance.now() - anim.startTime;
+      if (elapsed > anim.duration) {
+        mergeAnimations.delete(body.id);
+      } else {
+        const t = elapsed / anim.duration;
+        if (t < 0.5) {
+          scale = 0.5 + t * 1.0; // grow from 0.5 to 1.0
+        } else {
+          scale = 1.0 + Math.sin((t - 0.5) * Math.PI) * 0.1; // slight overshoot
+        }
+      }
+    }
 
     // Draw circle fill
     ctx.save();
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.arc(x, y, r * scale, 0, Math.PI * 2);
 
     if (img) {
       // Use image as fill
       ctx.clip();
-      ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
+      ctx.drawImage(img, x - r * scale, y - r * scale, r * 2 * scale, r * 2 * scale);
     } else {
       // Fallback: gradient fill
       const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
@@ -137,22 +150,10 @@ export function renderHeroBodies(
 
     // Border (fresh path — clip() consumed the previous path)
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.arc(x, y, r * scale, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // Hero name label
-    const fontSize = getFontSize(r);
-    ctx.save();
-    ctx.font = `bold ${fontSize}px ${FONT_STACK}`;
-    ctx.fillStyle = img ? '#ffffff' : '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 2;
-    ctx.fillText(heroDef.nameZh, x, y);
-    ctx.restore();
   }
 }
 
@@ -222,7 +223,7 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
     const previewY = barH / 2;
     const previewR = 16;
 
-    const img = getHeroImage(nextHero.tier, nextHero.nameEn);
+    const img = getHeroImg(nextHero.tier, nextHero.nameEn);
 
     // Draw fill
     ctx.save();

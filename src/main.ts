@@ -7,7 +7,7 @@ import { createPhysicsEngine, createHeroBody, clampBodyVelocity, getHeroBodies }
 import { processMerges } from './engine/merger';
 import {
   renderBackground, renderContainer, renderHeroBodies, renderParticles, renderHUD,
-  getContainerOffsetX, getContainerOffsetY, isInsideContainer, preloadHeroImages,
+  getContainerOffsetX, getContainerOffsetY, isInsideContainer, animateMerge,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
@@ -86,7 +86,6 @@ async function startGame(): Promise<void> {
   try { muted = readMuted(); } catch { muted = false; }
 
   engine = createPhysicsEngine();
-  preloadHeroImages();
 
   await initAudio();
   resumeAudio();
@@ -125,6 +124,7 @@ function gameLoop(timestamp: number): void {
   for (const result of mergeResults) {
     score += result.scoreDelta;
     if (result.created) {
+      animateMerge(result.created.id);
       const heroDef = HERO_CHAIN.find(h => h.tier === (result.created as any).heroTier);
       if (heroDef) {
         spawnParticles(result.created.position.x, result.created.position.y, heroDef.color);
