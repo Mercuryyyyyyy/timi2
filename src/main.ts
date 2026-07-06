@@ -151,9 +151,19 @@ function gameLoop(timestamp: number): void {
           playHeroVoice(heroDef.tier);
         }
       }
+    } else if (result.spawnedBodies) {
+      // 瑶+瑶 merge: refresh cleanup — spawn 3 small heroes
+      hasYao = true;
+      const cx = CONTAINER_WIDTH / 2;
+      const cy = CONTAINER_HEIGHT / 2;
+      playYaoSpecial();
+      triggerButterflyBloom(cx, cy);
+      // Play voice for each spawned hero
+      for (const body of result.spawnedBodies) {
+        playHeroVoice((body as any).heroTier);
+      }
     } else {
       // Both tier-11 bodies removed: award YAO_YAO_SCORE (incremented above)
-      // Also mark hasYao since the merge itself produced score for "yao+yao"
       hasYao = true;
     }
   }

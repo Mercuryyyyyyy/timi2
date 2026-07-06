@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
-import { HERO_CHAIN, YAO_YAO_SCORE, MERGE_COOLDOWN_MS } from '../constants';
+import { HERO_CHAIN, YAO_YAO_SCORE, MERGE_COOLDOWN_MS, CONTAINER_WIDTH, CONTAINER_HEIGHT } from '../constants';
 import { createHeroBody, removeBody, getPendingMerges, clearPendingMerges } from './physics';
+import { pickRandomTier } from './spawner';
 
 const { Body } = Matter;
 
@@ -8,6 +9,8 @@ export interface MergeResult {
   removed: Matter.Body[];
   created: Matter.Body | null;
   scoreDelta: number;
+  /** Extra bodies spawned after a 瑶+瑶 merge (cleanup refresh) */
+  spawnedBodies?: Matter.Body[];
 }
 
 /**
@@ -55,7 +58,24 @@ export function processMerges(world: Matter.World, now: number): MergeResult[] {
       Body.setVelocity(created, { x: 0, y: -2 });
       scoreDelta = nextHero.score;
     } else {
+      // 瑶 + 瑶: both disappear, award score, spawn 3 small heroes as cleanup refresh
       scoreDelta = YAO_YAO_SCORE;
+      const spawnedBodies: Matter.Body[] = [];
+      for (let i = 0; i < 3; i++) {
+        const tier = pickRandomTier();
+        const hero = HERO_CHAIN.find(h => h.tier === tier);
+        if (hero) {
+          const sx = 40 + Math.random() * (CONTAINER_WIDTH - 80);
+          const sy = CONTAINER_HEIGHT - 60 - Math.random() * 120;
+          const body = createHeroBody(world, {
+            tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: sx, y: sy,
+          });
+          Body.setVelocity(body, { x: (Math.random() - 0.5) * 2, y: -3 });
+          spawnedBodies.push(body);
+        }
+      }
+      results.push({ removed: [bodyA, bodyB], created: null, scoreDelta, spawnedBodies });
+      continue;
     }
 
     results.push({ removed: [bodyA, bodyB], created, scoreDelta });
