@@ -1,4 +1,4 @@
-import { CONTAINER_WIDTH, CONTAINER_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, HERO_CHAIN } from '../constants';
+import { CONTAINER_WIDTH, FONT_STACK, COLOR_ACCENT, COLOR_WHITE } from '../constants';
 
 export function drawMenu(ctx: CanvasRenderingContext2D): void {
   const cx = CONTAINER_WIDTH / 2;
