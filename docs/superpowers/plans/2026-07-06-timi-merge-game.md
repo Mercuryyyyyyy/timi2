@@ -678,7 +678,7 @@ git commit -m "feat: spawner with weighted random selection, position clamping, 
 - Create: `src/engine/merger.ts`
 - Create: `src/engine/merger.test.ts`
 
-- [ ] **Step 1: Create merger.ts**
+- [x] **Step 1: Create merger.ts**
 
 Write to `src/engine/merger.ts`:
 
@@ -733,7 +733,7 @@ export function tryMerge(world: Matter.World, bodyA: Matter.Body, bodyB: Matter.
 }
 ```
 
-- [ ] **Step 2: Create merger.test.ts**
+- [x] **Step 2: Create merger.test.ts**
 
 Write to `src/engine/merger.test.ts`:
 
