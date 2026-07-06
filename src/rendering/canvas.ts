@@ -52,46 +52,49 @@ export function setDropPreview(x: number | null, tier?: number): void {
   previewTier = tier ?? null;
 }
 
-export function renderDropPreview(ctx: CanvasRenderingContext2D, ox: number, oy: number): void {
-  if (dropPreviewX === null || !previewTier) return;
+export function renderDropPreview(ctx: CanvasRenderingContext2D, ox: number, oy: number, isDragging: boolean): void {
+  if (!previewTier) return;
   const hero = HERO_CHAIN.find(h => h.tier === previewTier);
   if (!hero) return;
   const r = hero.radius;
-  const x = ox + dropPreviewX;
+  const x = ox + (dropPreviewX ?? CONTAINER_WIDTH / 2);
   const y = oy + 40;
 
-  // Dashed guide line from preview ball to container bottom
-  ctx.save();
-  ctx.setLineDash([4, 6]);
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x, y + r);
-  ctx.lineTo(x, oy + CONTAINER_HEIGHT - 10);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // Only show dashed guide line when dragging
+  if (isDragging && dropPreviewX !== null) {
+    ctx.save();
+    ctx.setLineDash([4, 6]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r);
+    ctx.lineTo(x, oy + CONTAINER_HEIGHT - 10);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
 
-  // Semi-transparent preview ball
-  ctx.globalAlpha = 0.5;
+  // Semi-transparent when dragging, full when idle
+  ctx.save();
+  ctx.globalAlpha = isDragging ? 0.45 : 0.85;
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   const img = getHeroImg(hero.tier, hero.nameEn);
   if (img) {
-    ctx.save();
     ctx.clip();
     ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
-    ctx.restore();
   } else {
     ctx.fillStyle = hero.color;
     ctx.fill();
   }
-  // Border on fresh path (clip/fill consumed the previous path)
+  ctx.restore();
+
+  // Border on fresh path
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.strokeStyle = 'rgba(255,255,255,' + (isDragging ? '0.4' : '0.7') + ')';
   ctx.lineWidth = 1.5;
   ctx.stroke();
-  ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -248,6 +251,94 @@ export function renderParticles(ctx: CanvasRenderingContext2D, particles: Partic
     ctx.fill();
     ctx.restore();
   }
+}
+
+// ---------------------------------------------------------------------------
+// Butterfly bloom effect (yao merge)
+// ---------------------------------------------------------------------------
+
+interface Butterfly {
+  x: number; y: number; vx: number; vy: number;
+  size: number; rotation: number; rotationSpeed: number;
+  color: string; life: number; maxLife: number;
+  wingPhase: number;
+}
+
+let butterflies: Butterfly[] = [];
+
+export function triggerButterflyBloom(worldX: number, worldY: number): void {
+  const colors = ['#FF69B4', '#FF1493', '#FFB6C1', '#DA70D6', '#FF85A2', '#FFC0CB', '#E6A8D7'];
+  for (let i = 0; i < 20; i++) {
+    const angle = (Math.PI * 2 * i) / 20 + (Math.random() - 0.5) * 0.8;
+    const speed = 2 + Math.random() * 4;
+    butterflies.push({
+      x: worldX, y: worldY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2, // upward bias
+      size: 8 + Math.random() * 12,
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.15,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 0, maxLife: 60 + Math.random() * 40,
+      wingPhase: Math.random() * Math.PI * 2,
+    });
+  }
+  // Limit total butterflies
+  while (butterflies.length > 40) butterflies.shift();
+}
+
+function drawButterfly(ctx: CanvasRenderingContext2D, b: Butterfly, ox: number, oy: number): void {
+  const x = b.x + ox;
+  const y = b.y + oy;
+  const alpha = 1 - (b.life / b.maxLife);
+  const wingFlap = Math.sin(b.wingPhase + b.life * 0.3) * 0.4;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y);
+  ctx.rotate(b.rotation);
+
+  // Left wing
+  ctx.beginPath();
+  ctx.ellipse(-b.size * 0.5, 0, b.size * 0.6, b.size * (0.5 + wingFlap), -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = b.color;
+  ctx.fill();
+
+  // Right wing
+  ctx.beginPath();
+  ctx.ellipse(b.size * 0.5, 0, b.size * 0.6, b.size * (0.5 + wingFlap), 0.3, 0, Math.PI * 2);
+  ctx.fillStyle = b.color;
+  ctx.fill();
+
+  // Body
+  ctx.beginPath();
+  ctx.ellipse(0, 0, b.size * 0.15, b.size * 0.4, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+export function updateAndDrawButterflies(ctx: CanvasRenderingContext2D, ox: number, oy: number, deltaMs: number): void {
+  const f = deltaMs / 16.67; // normalize to ~60fps for frame-rate independence
+  for (let i = butterflies.length - 1; i >= 0; i--) {
+    const b = butterflies[i];
+    b.life += f;
+    b.x += b.vx * f;
+    b.y += b.vy * f;
+    b.vx *= Math.pow(0.98, f);
+    b.vy *= Math.pow(0.98, f);
+    b.rotation += b.rotationSpeed * f;
+    if (b.life >= b.maxLife) {
+      butterflies.splice(i, 1);
+    } else {
+      drawButterfly(ctx, b, ox, oy);
+    }
+  }
+}
+
+export function clearButterflies(): void {
+  butterflies = [];
 }
 
 // ---------------------------------------------------------------------------

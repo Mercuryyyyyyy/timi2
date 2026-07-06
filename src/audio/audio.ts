@@ -148,12 +148,37 @@ export function stopBGM(): void {
 export async function playZhenjiBGM(): Promise<void> {
   if (isMuted || !audioContext) return;
   try {
-    const response = await fetch('/audio/zhenji/betray.mp3');
+    const response = await fetch('/audio/zhenji/betray.wav');
     if (!response.ok) return;
     const buffer = await response.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(buffer);
     playBuffer(audioBuffer);
   } catch {}
+}
+
+/** Play special 瑶 merge audio (那艺娜 "哇" + "小妹妹你挺牛逼克拉斯啊") */
+export async function playYaoSpecial(): Promise<void> {
+  if (isMuted || !audioContext) return;
+  try {
+    // Play "wow" first
+    const wowResp = await fetch('/audio/yao/wow.wav');
+    if (wowResp.ok) {
+      const wowBuf = await wowResp.arrayBuffer();
+      const wowAudio = await audioContext.decodeAudioData(wowBuf);
+      playBuffer(wowAudio);
+    }
+  } catch {}
+  // Play "niubi" after 600ms delay
+  setTimeout(async () => {
+    try {
+      const niubiResp = await fetch('/audio/yao/niubi.wav');
+      if (niubiResp.ok && audioContext) {
+        const niubiBuf = await niubiResp.arrayBuffer();
+        const niubiAudio = await audioContext.decodeAudioData(niubiBuf);
+        playBuffer(niubiAudio);
+      }
+    } catch {}
+  }, 600);
 }
 
 export function getIsMuted(): boolean {

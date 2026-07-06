@@ -9,13 +9,14 @@ import {
   renderBackground, renderContainer, renderHeroBodies, renderParticles, renderHUD,
   getContainerOffsetX, getContainerOffsetY, isInsideContainer, animateMerge,
   setDropPreview, renderDropPreview,
+  triggerButterflyBloom, updateAndDrawButterflies, clearButterflies,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
   getParticles,
 } from './rendering/animations';
 import { consumeNextHero, isMuteButtonClicked } from './rendering/hud';
-import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM } from './audio/audio';
+import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
 import { drawGameOver, isReplayClicked, isHomeClicked } from './ui/gameover';
@@ -88,6 +89,7 @@ async function startGame(): Promise<void> {
   hasYao = false;
   deathTimers.clear();
   clearAnimations();
+  clearButterflies();
   try { highScore = readHighScore(); } catch { highScore = 0; }
   try { muted = readMuted(); } catch { muted = false; }
 
@@ -138,9 +140,17 @@ function gameLoop(timestamp: number): void {
       if (heroDef) {
         spawnParticles(result.created.position.x, result.created.position.y, heroDef.color);
         startPopAnimation(result.created.position.x, result.created.position.y, heroDef.radius, heroDef);
-        playHeroVoice(heroDef.tier);
+
+        if (heroDef.tier === 11) {
+          playYaoSpecial(); // Custom 那艺娜 audio instead of 瑶 voice
+          triggerButterflyBloom(result.created.position.x, result.created.position.y);
+          hasYao = true;
+        } else if (heroDef.tier === 5 && Math.random() < 0.4) {
+          playZhenjiBGM();
+        } else {
+          playHeroVoice(heroDef.tier);
+        }
       }
-      if ((result.created as any).heroTier === 11) hasYao = true;
     } else {
       // Both tier-11 bodies removed: award YAO_YAO_SCORE (incremented above)
       // Also mark hasYao since the merge itself produced score for "yao+yao"
@@ -174,12 +184,12 @@ function gameLoop(timestamp: number): void {
   }
 
   // Render
-  renderFrame();
+  renderFrame(delta);
 
   rafId = requestAnimationFrame(gameLoop);
 }
 
-function renderFrame(): void {
+function renderFrame(delta: number): void {
   if (!ctx || !engine) return;
 
   ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
@@ -195,10 +205,13 @@ function renderFrame(): void {
   }
 
   // Drop preview line
-  renderDropPreview(ctx, ox, oy);
+  renderDropPreview(ctx, ox, oy, isDragging);
 
   // Render hero bodies relative to container
   renderHeroBodies(ctx, engine.world, ox, oy);
+
+  // Butterfly bloom effect (yao merge)
+  updateAndDrawButterflies(ctx, ox, oy, delta);
 
   // Render particles relative to container
   renderParticles(ctx, getParticles(), ox, oy);
