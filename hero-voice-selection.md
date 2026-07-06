@@ -102,7 +102,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220409/16494936422710.wav
   ```
 
-- [x] **#17** `[挑衅]` 子弹和我的帅气，你都无法抵御！
+- [ ] **#17** `[挑衅]` 子弹和我的帅气，你都无法抵御！
   
   ```
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220409/16494936672896.wav

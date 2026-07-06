@@ -25,9 +25,9 @@ describe('constants', () => {
     }
   });
 
-  it('radii match formula: 20 + (tier-1)*25/10 rounded to nearest int', () => {
+  it('radii match formula: 25 + (tier-1)*30/10 rounded to nearest int', () => {
     HERO_CHAIN.forEach(h => {
-      const expected = Math.round(20 + (h.tier - 1) * (25 / 10));
+      const expected = Math.round(25 + (h.tier - 1) * 30 / 10);
       expect(h.radius).toBe(expected);
     });
   });
@@ -64,9 +64,9 @@ describe('constants', () => {
     expect(getFontSize(20)).toBe(10);
     expect(getFontSize(23)).toBe(10);
     expect(getFontSize(25)).toBe(12);
-    expect(getFontSize(35)).toBe(12);
-    expect(getFontSize(38)).toBe(14);
-    expect(getFontSize(45)).toBe(14);
+    expect(getFontSize(37)).toBe(12);
+    expect(getFontSize(40)).toBe(14);
+    expect(getFontSize(55)).toBe(14);
   });
 
   it('YAO_YAO_SCORE is 10000', () => {

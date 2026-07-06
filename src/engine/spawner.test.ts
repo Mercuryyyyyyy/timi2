@@ -27,7 +27,7 @@ describe('spawner', () => {
   });
 
   it('pickSpawnX returns a value within container bounds', () => {
-    const x = pickSpawnX(engine.world, 20);
+    const x = pickSpawnX(engine.world, 25);
     expect(x).toBeGreaterThanOrEqual(25);
     expect(x).toBeLessThanOrEqual(CONTAINER_WIDTH - 25);
   });
@@ -40,7 +40,7 @@ describe('spawner', () => {
       (body as any).heroRadius = 15;
       Matter.Composite.add(engine.world, body);
     }
-    const x = pickSpawnX(engine.world, 45);
+    const x = pickSpawnX(engine.world, 55);
     expect(x).toBe(CONTAINER_WIDTH / 2);
   });
 

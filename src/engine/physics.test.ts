@@ -17,16 +17,16 @@ describe('physics', () => {
   });
 
   it('creates a hero body with correct properties', () => {
-    const body = createHeroBody(engine.world, { tier: 1, nameZh: '马可波罗', radius: 20, x: 180, y: 100 });
+    const body = createHeroBody(engine.world, { tier: 1, nameZh: '马可波罗', radius: 25, x: 180, y: 100 });
     expect((body as any).heroTier).toBe(1);
     expect((body as any).heroNameZh).toBe('马可波罗');
-    expect((body as any).heroRadius).toBe(20);
+    expect((body as any).heroRadius).toBe(25);
     expect((body as any).mergeCooldownUntil).toBe(0);
     expect(body.collisionFilter.category).toBe(HERO_CATEGORY);
   });
 
   it('clampBodyVelocity caps excessive positive velocity at MAX_VELOCITY', () => {
-    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 20, x: 180, y: 100 });
+    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 25, x: 180, y: 100 });
     Matter.Body.setVelocity(body, { x: 100, y: 100 });
     clampBodyVelocity(body);
     expect(body.velocity.x).toBe(MAX_VELOCITY);
@@ -34,7 +34,7 @@ describe('physics', () => {
   });
 
   it('clampBodyVelocity caps excessive negative velocity at -MAX_VELOCITY', () => {
-    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 20, x: 180, y: 100 });
+    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 25, x: 180, y: 100 });
     Matter.Body.setVelocity(body, { x: -100, y: -100 });
     clampBodyVelocity(body);
     expect(body.velocity.x).toBe(-MAX_VELOCITY);
@@ -42,7 +42,7 @@ describe('physics', () => {
   });
 
   it('clampBodyVelocity does not modify velocity below the cap', () => {
-    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 20, x: 180, y: 100 });
+    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'Test', radius: 25, x: 180, y: 100 });
     Matter.Body.setVelocity(body, { x: 5, y: -3 });
     clampBodyVelocity(body);
     expect(body.velocity.x).toBe(5);
@@ -50,13 +50,13 @@ describe('physics', () => {
   });
 
   it('getHeroBodies returns only hero bodies', () => {
-    createHeroBody(engine.world, { tier: 1, nameZh: 'A', radius: 20, x: 100, y: 100 });
-    createHeroBody(engine.world, { tier: 2, nameZh: 'B', radius: 23, x: 200, y: 100 });
+    createHeroBody(engine.world, { tier: 1, nameZh: 'A', radius: 25, x: 100, y: 100 });
+    createHeroBody(engine.world, { tier: 2, nameZh: 'B', radius: 28, x: 200, y: 100 });
     expect(getHeroBodies(engine.world)).toHaveLength(2);
   });
 
   it('removeBody removes a body from the world', () => {
-    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'A', radius: 20, x: 100, y: 100 });
+    const body = createHeroBody(engine.world, { tier: 1, nameZh: 'A', radius: 25, x: 100, y: 100 });
     expect(getHeroBodies(engine.world)).toHaveLength(1);
     removeBody(engine.world, body);
     expect(getHeroBodies(engine.world)).toHaveLength(0);
