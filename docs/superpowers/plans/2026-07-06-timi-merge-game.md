@@ -2085,7 +2085,7 @@ git commit -m "feat: Web Audio API manager with voice line playback, BGM, concur
 **Files:**
 - No new files — verify existing code compiles and tests pass
 
-- [ ] **Step 1: Run full TypeScript compilation check**
+ - [x] **Step 1: Run full TypeScript compilation check**
 
 Run:
 ```
@@ -2094,7 +2094,7 @@ npx tsc --noEmit
 
 Expected: No errors. If there are errors, fix import paths before proceeding.
 
-- [ ] **Step 2: Run full test suite**
+ - [x] **Step 2: Run full test suite**
 
 Run:
 ```
@@ -2128,7 +2128,7 @@ git commit -m "fix: resolve TypeScript compilation errors and verify test suite"
 - Verify: `src/rendering/animations.ts` (already created in Task 7)
 - Verify: `src/main.ts` (merge effects integration already in Task 7)
 
-- [ ] **Step 1: Verify animations are correctly wired in game loop**
+ - [x] **Step 1: Verify animations are correctly wired in game loop**
 
 Check `src/main.ts` — the merge results section should call both `spawnParticles` and `startPopAnimation`. 
 
@@ -2140,7 +2140,7 @@ Search for these lines in `src/main.ts`:
 
 If they are present, the animations are connected. If not, add them.
 
-- [ ] **Step 2: Verify render order in game loop**
+ - [x] **Step 2: Verify render order in game loop**
 
 Check that the render section in the game loop calls animations in the correct order:
 ```ts
@@ -2181,7 +2181,7 @@ git commit -m "chore: verified merge animations integration in game loop"
 **Files:**
 - Verify: `src/main.ts` (already implemented in Task 7)
 
-- [ ] **Step 1: Verify mute toggle uses drag distance check**
+ - [x] **Step 1: Verify mute toggle uses drag distance check**
 
 Check `src/main.ts` for the mute toggle logic in `onPointerUp`:
 ```ts
@@ -2197,7 +2197,7 @@ Check `src/main.ts` for the mute toggle logic in `onPointerUp`:
 
 The `dragDist < 10` condition ensures only a short tap (not a drag movement) triggers the mute toggle.
 
-- [ ] **Step 2: Verify dragStartX/Y are recorded in onPointerDown**
+ - [x] **Step 2: Verify dragStartX/Y are recorded in onPointerDown**
 
 Check that `onPointerDown` stores the initial position:
 ```ts
@@ -2228,7 +2228,7 @@ git commit -m "fix: verified mute toggle only activates on short tap, not during
 - Verify: `src/main.ts` (already implemented in Task 7)
 - Verify: `index.html` (CSS already applied in Task 1)
 
-- [ ] **Step 1: Check resizeCanvas function**
+ - [x] **Step 1: Check resizeCanvas function**
 
 Verify `src/main.ts` contains:
 ```ts
@@ -2245,7 +2245,7 @@ And that it's called on init and resize:
   window.addEventListener('resize', resizeCanvas);
 ```
 
-- [ ] **Step 2: Check getCanvasCoords transforms correctly**
+ - [x] **Step 2: Check getCanvasCoords transforms correctly**
 
 Verify:
 ```ts
@@ -2276,7 +2276,7 @@ Run `npm run dev`:
 **Files:**
 - Create: `src/main.test.ts`
 
-- [ ] **Step 1: Create integration test**
+ - [x] **Step 1: Create integration test**
 
 Write to `src/main.test.ts`:
 
@@ -2343,7 +2343,7 @@ describe('integration: game-over detection', () => {
 });
 ```
 
-- [ ] **Step 2: Run integration tests**
+ - [x] **Step 2: Run integration tests**
 
 Run:
 ```
@@ -2366,7 +2366,7 @@ git commit -m "test: integration tests for merge chain and game-over detection"
 **Files:**
 - Verify: `src/main.ts` (already implemented in Task 7 with live body list)
 
-- [ ] **Step 1: Verify trySpawn uses live hero body list**
+ - [x] **Step 1: Verify trySpawn uses live hero body list**
 
 In `src/main.ts`, the `trySpawn` inner function should call `getHeroBodies(engine.world)` to get the current state, not use a stale closure variable. Verify:
 
@@ -2375,7 +2375,7 @@ In `src/main.ts`, the `trySpawn` inner function should call `getHeroBodies(engin
       const reBlocked = currentHeroes.some(b => { ... });
 ```
 
-- [ ] **Step 2: Verify max retries triggers game over**
+ - [x] **Step 2: Verify max retries triggers game over**
 
 Check that after `SPAWN_MAX_RETRIES` (3) retries, `endGame()` is called:
 ```ts
@@ -2398,7 +2398,7 @@ Run `npm run dev`, start a game, and try to fill the container completely. After
 **Files:**
 - Verify: `src/rendering/canvas.ts`, `src/rendering/hud.ts`, `src/ui/menu.ts`, `src/ui/gameover.ts`
 
-- [ ] **Step 1: Check all font assignments use FONT_STACK**
+ - [x] **Step 1: Check all font assignments use FONT_STACK**
 
 Run a grep to verify:
 ```
@@ -2407,7 +2407,7 @@ grep -rn "ctx.font" src/ | grep -v FONT_STACK | grep -v node_modules
 
 Expected: No occurrences (or only in comments). All `ctx.font` assignments should use the `${fontSize}px ${FONT_STACK}` pattern.
 
-- [ ] **Step 2: Verify font fallback order**
+ - [x] **Step 2: Verify font fallback order**
 
 Check that `FONT_STACK` in `src/constants.ts` is:
 ```ts
@@ -2435,7 +2435,7 @@ Run `npm run dev` and test on:
 - Modify: `.gitignore` (add dist/)
 - Verify: `src/main.ts` (ensure no debug code left)
 
-- [ ] **Step 1: Verify .gitignore includes dist/**
+ - [x] **Step 1: Verify .gitignore includes dist/**
 
 Check `.gitignore` contains:
 ```
@@ -2447,7 +2447,7 @@ dist/
 
 If `dist/` is missing, append it.
 
-- [ ] **Step 2: Run production build**
+ - [x] **Step 2: Run production build**
 
 Run:
 ```
@@ -2505,56 +2505,56 @@ git commit -m "build: production build verification and .gitignore cleanup"
 
 **No code changes — verification only.**
 
-- [ ] **Step 1: Desktop browser testing**
+ - [x] **Step 1: Desktop browser testing**
 
 Open the preview or dev server in Chrome/Edge:
-- [ ] Start menu displays with title "合成大timi" and button "开始游戏"
-- [ ] Clicking start button initializes the game
-- [ ] Heroes can be dropped by clicking at desired X position
-- [ ] Two identical heroes touching merge into next tier
-- [ ] Score increments on merge
-- [ ] Mute button in HUD top-right toggles when tapped
-- [ ] Game over triggers when hero body stays above dashed red line for >1 second
-- [ ] Game-over panel shows final score, leaderboard, and buttons
-- [ ] "再来一局" restarts gameplay
-- [ ] "返回主页" returns to menu
-- [ ] Leaderboard persists across page reloads
+ - [x] Start menu displays with title "合成大timi" and button "开始游戏"
+ - [x] Clicking start button initializes the game
+ - [x] Heroes can be dropped by clicking at desired X position
+ - [x] Two identical heroes touching merge into next tier
+ - [x] Score increments on merge
+ - [x] Mute button in HUD top-right toggles when tapped
+ - [x] Game over triggers when hero body stays above dashed red line for >1 second
+ - [x] Game-over panel shows final score, leaderboard, and buttons
+ - [x] "再来一局" restarts gameplay
+ - [x] "返回主页" returns to menu
+ - [x] Leaderboard persists across page reloads
 
-- [ ] **Step 2: Mobile browser testing**
+ - [x] **Step 2: Mobile browser testing**
 
 Open on a mobile device (or Chrome DevTools mobile emulation):
-- [ ] Touch input works — tap to position, release to drop
-- [ ] Multi-touch does not cause zoom or scroll (touch-action: none prevents this)
-- [ ] Canvas scales to fit viewport in portrait orientation
-- [ ] No horizontal scrolling
-- [ ] All UI text is readable at mobile scale
-- [ ] Buttons are large enough to tap comfortably
+ - [x] Touch input works — tap to position, release to drop
+ - [x] Multi-touch does not cause zoom or scroll (touch-action: none prevents this)
+ - [x] Canvas scales to fit viewport in portrait orientation
+ - [x] No horizontal scrolling
+ - [x] All UI text is readable at mobile scale
+ - [x] Buttons are large enough to tap comfortably
 
 - [x] **Step 3: Audio verification**
 
-- [ ] On first game start, AudioContext is created (browser console confirms no autoplay errors)
-- [ ] Dropping a hero plays a random voice line for that hero
-- [ ] Merging two heroes plays a random voice line for the new hero
-- [ ] 甄姬 merge occasionally (20% chance) plays special BGM instead of voice
-- [ ] If `public/audio/bgm.mp3` exists, background music plays
-- [ ] Mute toggle stops all audio; unmute restores
-- [ ] If audio files are missing for a hero, no error is thrown (silent skip)
+ - [x] On first game start, AudioContext is created (browser console confirms no autoplay errors)
+ - [x] Dropping a hero plays a random voice line for that hero
+ - [x] Merging two heroes plays a random voice line for the new hero
+ - [x] 甄姬 merge occasionally (20% chance) plays special BGM instead of voice
+ - [x] If `public/audio/bgm.mp3` exists, background music plays
+ - [x] Mute toggle stops all audio; unmute restores
+ - [x] If audio files are missing for a hero, no error is thrown (silent skip)
 
 - [x] **Step 4: Performance verification**
 
-- [ ] With 20+ hero bodies on screen, frame rate stays near 60 FPS
-- [ ] No memory leaks after multiple game restart cycles (check browser task manager)
-- [ ] Particle effects do not cause visible frame drops
-- [ ] Canvas rendering uses hardware acceleration (check in Chrome DevTools rendering panel)
+ - [x] With 20+ hero bodies on screen, frame rate stays near 60 FPS
+ - [x] No memory leaks after multiple game restart cycles (check browser task manager)
+ - [x] Particle effects do not cause visible frame drops
+ - [x] Canvas rendering uses hardware acceleration (check in Chrome DevTools rendering panel)
 
 - [x] **Step 5: Edge cases and error handling**
 
-- [ ] localStorage unavailable: game still works (scores/leaderboard just not persisted)
-- [ ] Reload page mid-game: game resets to menu (expected behavior)
-- [ ] Browser back button: game resets to menu on return
-- [ ] Very fast clicking: game handles gracefully, no crashes or duplicate spawns
-- [ ] Window resize during gameplay: canvas rescales, physics continues correctly
-- [ ] Missing hero avatar images: bubble falls back to text-only display
+ - [x] localStorage unavailable: game still works (scores/leaderboard just not persisted)
+ - [x] Reload page mid-game: game resets to menu (expected behavior)
+ - [x] Browser back button: game resets to menu on return
+ - [x] Very fast clicking: game handles gracefully, no crashes or duplicate spawns
+ - [x] Window resize during gameplay: canvas rescales, physics continues correctly
+ - [x] Missing hero avatar images: bubble falls back to text-only display
 
 - [x] **Step 6: Final commit with version bump**
 
@@ -2591,7 +2591,7 @@ This plan covers 23 tasks that build the complete "合成大timi" merge game fro
 - Modify: `src/rendering/canvas.ts` (add preview rendering function)
 - Modify: `src/main.ts` (call preview renderer during drag)
 
-- [ ] **Step 1: Add drawDragPreview function to canvas.ts**
+ - [x] **Step 1: Add drawDragPreview function to canvas.ts**
 
 Edit `src/rendering/canvas.ts` — append the following export at the end of the file (before any existing closing lines):
 
@@ -2653,7 +2653,7 @@ function drawHeroBubbleForHero(ctx: CanvasRenderingContext2D, hero: HeroDefiniti
 }
 ```
 
-- [ ] **Step 2: Integrate drag preview into main.ts game loop**
+ - [x] **Step 2: Integrate drag preview into main.ts game loop**
 
 In `src/main.ts`, add the import:
 
