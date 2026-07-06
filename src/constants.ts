@@ -44,7 +44,7 @@ export interface Particle {
 export const HERO_CHAIN: HeroDefinition[] = [
   { tier: 1,  nameZh: '马可波罗', nameEn: 'marco_polo',      heroId: 132, color: '#87CEEB', radius: 25, score: 0 },
   { tier: 2,  nameZh: '不知火舞', nameEn: 'buzhihuowu',      heroId: 157, color: '#FFB6C1', radius: 28, score: 10 },
-  { tier: 3,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_ye', heroId: 182, color: '#DDA0DD', radius: 31, score: 20 },
+  { tier: 3,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_xie', heroId: 182, color: '#DDA0DD', radius: 31, score: 20 },
   { tier: 4,  nameZh: '铠',       nameEn: 'kai',             heroId: 193, color: '#B0C4DE', radius: 34, score: 40 },
   { tier: 5,  nameZh: '甄姬',     nameEn: 'zhen_ji',         heroId: 127, color: '#98FB98', radius: 37, score: 80 },
   { tier: 6,  nameZh: '云缨',     nameEn: 'yun_ying',        heroId: 538, color: '#FFDAB9', radius: 40, score: 160 },

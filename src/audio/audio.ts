@@ -21,7 +21,7 @@ function getAudioKey(nameEn: string): string {
   const overrides: Record<string, string> = {
     'marco_polo': 'makeboluo',
     'buzhihuowu': 'buzhihuowu',
-    'gan_jiang_mo_ye': 'ganjiangmoxie',
+    'gan_jiang_mo_xie': 'ganjiangmoxie',
   };
   return overrides[nameEn] ?? nameEn.toLowerCase().replace(/_/g, '');
 }
