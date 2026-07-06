@@ -826,7 +826,7 @@ git commit -m "feat: merger with same-tier detection, cooldowns, Yao+Yao special
 - Create: `src/rendering/canvas.ts`
 - Modify: `src/engine/physics.ts` (add `_heroDef` reference — already done in Task 3, verify)
 
-- [ ] **Step 1: Create canvas.ts with rendering functions**
+- [x] **Step 1: Create canvas.ts with rendering functions**
 
 Write to `src/rendering/canvas.ts`:
 
