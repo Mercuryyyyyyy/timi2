@@ -56,16 +56,7 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.fillText('合成规则：相同英雄碰撞 → 合成下一级', cx, ruleY);
   ctx.restore();
 
-  ruleY += 18;
-  // Compact chain: "马可→火舞→干将→铠→甄姬→云缨→海诺→虞姬→小乔→文姬→瑶"
-  const chainNames = HERO_CHAIN.map(h => h.nameZh).join(' → ');
-  ctx.save();
-  ctx.font = `10px ${FONT_STACK}`;
-  ctx.fillStyle = '#999';
-  ctx.textAlign = 'center';
-  ctx.fillText(chainNames, cx, ruleY);
-  ctx.restore();
-
+  // Operation hint
   ruleY += 18;
   ctx.save();
   ctx.font = `bold 10px ${FONT_STACK}`;
@@ -74,7 +65,6 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.fillText('🌟 瑶 + 瑶 = 10000分 + 蝴蝶特效 + 掉落3个小英雄清场', cx, ruleY);
   ctx.restore();
 
-  // Operation hint
   ruleY += 22;
   ctx.save();
   ctx.font = `10px ${FONT_STACK}`;
