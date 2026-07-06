@@ -400,17 +400,6 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.fillText(`🏆 ${data.score}`, 12, cy);
   ctx.restore();
 
-  // Center-right: Highest tier merged
-  if (data.highestTierName) {
-    ctx.save();
-    ctx.font = `11px ${FONT_STACK}`;
-    ctx.fillStyle = '#999999';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`最高合成: ${data.highestTierName}`, BUTTON_START_X - 8, cy);
-    ctx.restore();
-  }
-
   // Render HUD buttons (pause, restart, settings, mute)
   drawHUDButton(ctx, BUTTON_PAUSE_CX, cy, data.isPaused ? '▶' : '⏸');
   drawHUDButton(ctx, BUTTON_RESTART_CX, cy, '🔄');
