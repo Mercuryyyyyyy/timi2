@@ -41,6 +41,31 @@ export function animateMerge(bodyId: number): void {
 }
 
 // ---------------------------------------------------------------------------
+// Drop preview line
+// ---------------------------------------------------------------------------
+
+let dropPreviewX: number | null = null;
+
+export function setDropPreview(x: number | null): void {
+  dropPreviewX = x;
+}
+
+export function renderDropPreview(ctx: CanvasRenderingContext2D, ox: number, oy: number): void {
+  if (dropPreviewX === null) return;
+  // Draw a subtle dashed line from top to bottom at preview X
+  ctx.save();
+  ctx.setLineDash([4, 6]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ox + dropPreviewX, oy + 40);
+  ctx.lineTo(ox + dropPreviewX, oy + CONTAINER_HEIGHT - 10);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
 // Background
 // ---------------------------------------------------------------------------
 
@@ -79,6 +104,24 @@ export function renderContainer(ctx: CanvasRenderingContext2D): void {
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  // Subtle inner shadow at top (depth cue)
+  const shadowGrad = ctx.createLinearGradient(x, y, x, y + 20);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.08)');
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = shadowGrad;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + CONTAINER_WIDTH - r, y);
+  ctx.quadraticCurveTo(x + CONTAINER_WIDTH, y, x + CONTAINER_WIDTH, y + r);
+  ctx.lineTo(x + CONTAINER_WIDTH, y + CONTAINER_HEIGHT - r);
+  ctx.quadraticCurveTo(x + CONTAINER_WIDTH, y + CONTAINER_HEIGHT, x + CONTAINER_WIDTH - r, y + CONTAINER_HEIGHT);
+  ctx.lineTo(x + r, y + CONTAINER_HEIGHT);
+  ctx.quadraticCurveTo(x, y + CONTAINER_HEIGHT, x, y + CONTAINER_HEIGHT - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+
   // Death line
   const deathY = y + DEATH_LINE_Y;
   ctx.beginPath();
@@ -103,8 +146,8 @@ export function renderHeroBodies(
 ): void {
   const bodies = getHeroBodies(world);
   for (const body of bodies) {
-    const x = body.position.x + containerOffsetX;
-    const y = body.position.y + containerOffsetY;
+    const x = ((body as any)._displayX ?? body.position.x) + containerOffsetX;
+    const y = ((body as any)._displayY ?? body.position.y) + containerOffsetY;
     const tier = (body as any).heroTier as number;
     const heroDef = HERO_CHAIN.find(h => h.tier === tier);
     if (!heroDef) continue;
@@ -117,14 +160,19 @@ export function renderHeroBodies(
     const anim = mergeAnimations.get(body.id);
     if (anim) {
       const elapsed = performance.now() - anim.startTime;
-      if (elapsed > anim.duration) {
+      const duration = anim.duration;
+      if (elapsed > duration) {
         mergeAnimations.delete(body.id);
       } else {
-        const t = elapsed / anim.duration;
-        if (t < 0.5) {
-          scale = 0.5 + t * 1.0; // grow from 0.5 to 1.0
+        const t = elapsed / duration;
+        // Smoother "pop": spring-like easing
+        // 0.3 -> 1.15 -> 0.95 -> 1.0
+        if (t < 0.4) {
+          scale = 0.3 + t / 0.4 * 0.85; // 0.3 → 1.15
+        } else if (t < 0.7) {
+          scale = 1.15 - (t - 0.4) / 0.3 * 0.2; // 1.15 → 0.95
         } else {
-          scale = 1.0 + Math.sin((t - 0.5) * Math.PI) * 0.1; // slight overshoot
+          scale = 0.95 + (t - 0.7) / 0.3 * 0.05; // 0.95 → 1.0
         }
       }
     }

@@ -8,6 +8,7 @@ import { processMerges } from './engine/merger';
 import {
   renderBackground, renderContainer, renderHeroBodies, renderParticles, renderHUD,
   getContainerOffsetX, getContainerOffsetY, isInsideContainer, animateMerge,
+  setDropPreview, renderDropPreview,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
@@ -154,6 +155,16 @@ function gameLoop(timestamp: number): void {
   // Update animations
   updateAnimations(delta);
 
+  // Smooth rendering: interpolate display positions toward physics positions
+  for (const body of getHeroBodies(engine.world)) {
+    if ((body as any)._displayX === undefined) {
+      (body as any)._displayX = body.position.x;
+      (body as any)._displayY = body.position.y;
+    }
+    (body as any)._displayX += (body.position.x - (body as any)._displayX) * 0.35;
+    (body as any)._displayY += (body.position.y - (body as any)._displayY) * 0.35;
+  }
+
   // Render
   renderFrame();
 
@@ -169,6 +180,9 @@ function renderFrame(): void {
 
   const ox = getContainerOffsetX(canvas);
   const oy = getContainerOffsetY();
+
+  // Drop preview line
+  renderDropPreview(ctx, ox, oy);
 
   // Render hero bodies relative to container
   renderHeroBodies(ctx, engine.world, ox, oy);
@@ -290,14 +304,30 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
   // Give a small initial velocity for visual feedback
   Matter.Body.setVelocity(body, { x: 0, y: 2 });
   playHeroVoice(hero.tier);
+  setDropPreview(null);
 }
 
-function onPointerMove(_e: MouseEvent | TouchEvent): void {
-  // Reserved for drag-to-position
+function onPointerMove(e: MouseEvent | TouchEvent): void {
+  e.preventDefault();
+  const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
+
+  if (scene !== 'playing' || !engine) {
+    setDropPreview(null);
+    return;
+  }
+
+  const inContainer = isInsideContainer(pos.x, pos.y, canvas);
+  if (!inContainer) {
+    setDropPreview(null);
+    return;
+  }
+
+  const worldX = pos.x - getContainerOffsetX(canvas);
+  setDropPreview(worldX);
 }
 
 function onPointerUp(_e: MouseEvent | TouchEvent): void {
-  // Reserved for drag release
+  setDropPreview(null);
 }
 
 // ---------------------------------------------------------------------------
