@@ -160,25 +160,13 @@ export async function playZhenjiBGM(): Promise<void> {
 export async function playYaoSpecial(): Promise<void> {
   if (isMuted || !audioContext) return;
   try {
-    // Play "wow" first
-    const wowResp = await fetch('/audio/yao/wow.wav');
-    if (wowResp.ok) {
-      const wowBuf = await wowResp.arrayBuffer();
-      const wowAudio = await audioContext.decodeAudioData(wowBuf);
-      playBuffer(wowAudio);
+    const resp = await fetch('/audio/yao/wow.wav');
+    if (resp.ok) {
+      const buf = await resp.arrayBuffer();
+      const audio = await audioContext.decodeAudioData(buf);
+      playBuffer(audio);
     }
   } catch {}
-  // Play "niubi" after 600ms delay
-  setTimeout(async () => {
-    try {
-      const niubiResp = await fetch('/audio/yao/niubi.wav');
-      if (niubiResp.ok && audioContext) {
-        const niubiBuf = await niubiResp.arrayBuffer();
-        const niubiAudio = await audioContext.decodeAudioData(niubiBuf);
-        playBuffer(niubiAudio);
-      }
-    } catch {}
-  }, 600);
 }
 
 export function getIsMuted(): boolean {
