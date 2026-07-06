@@ -1444,7 +1444,7 @@ git commit -m "feat: animations system, HUD overlay, and main game loop with ful
 - Create: `src/leaderboard/storage.ts`
 - Create: `src/leaderboard/storage.test.ts`
 
-- [ ] **Step 1: Create storage.ts**
+ - [x] **Step 1: Create storage.ts**
 
 Write to `src/leaderboard/storage.ts`:
 
@@ -1493,7 +1493,7 @@ export function writeHighScore(score: number): void {
 }
 ```
 
-- [ ] **Step 2: Create storage.test.ts**
+ - [x] **Step 2: Create storage.test.ts**
 
 Write to `src/leaderboard/storage.test.ts`:
 
@@ -1579,7 +1579,7 @@ git commit -m "feat: localStorage leaderboard storage with top-5, mute, high sco
 **Files:**
 - Create: `src/ui/menu.ts`
 
-- [ ] **Step 1: Create menu.ts**
+ - [x] **Step 1: Create menu.ts**
 
 Write to `src/ui/menu.ts`:
 
@@ -1643,7 +1643,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 ```
 
-- [ ] **Step 2: Commit**
+ - [x] **Step 2: Commit**
 
 ```bash
 git add src/ui/menu.ts
@@ -1657,7 +1657,7 @@ git commit -m "feat: start menu screen with title, subtitle, start button, and v
 **Files:**
 - Create: `src/ui/gameover.ts`
 
-- [ ] **Step 1: Create gameover.ts**
+ - [x] **Step 1: Create gameover.ts**
 
 Write to `src/ui/gameover.ts`:
 
@@ -1752,7 +1752,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 ```
 
-- [ ] **Step 2: Commit**
+ - [x] **Step 2: Commit**
 
 ```bash
 git add src/ui/gameover.ts
