@@ -432,7 +432,7 @@ git commit -m "feat: hero chain, physics constants, theme colors, and unit tests
 - Create: `src/engine/physics.ts`
 - Create: `src/engine/physics.test.ts`
 
-- [ ] **Step 1: Create physics.ts**
+- [x] **Step 1: Create physics.ts**
 
 Write to `src/engine/physics.ts`:
 
@@ -503,7 +503,7 @@ export function removeBody(world: Matter.World, body: Matter.Body): void {
 }
 ```
 
-- [ ] **Step 2: Create physics.test.ts**
+- [x] **Step 2: Create physics.test.ts**
 
 Write to `src/engine/physics.test.ts`:
 
