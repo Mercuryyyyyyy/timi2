@@ -1,6 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const HERO_NAMES = ['makeboluo', 'ganjiangmoxie', 'kai', 'zhenji', 'yunying', 'hainuo', 'yuji', 'xiaoqiao', 'caiwenji', 'yao'];
 
