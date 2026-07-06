@@ -180,7 +180,7 @@ git commit -m "feat: project scaffolding with Vite, TypeScript, Matter.js"
 - Create: `src/constants.ts`
 - Create: `src/constants.test.ts`
 
-- [ ] **Step 1: Create constants.ts with hero chain, physics config, theme colors, spawn probabilities**
+- [x] **Step 1: Create constants.ts with hero chain, physics config, theme colors, spawn probabilities**
 
 Write to `src/constants.ts`:
 
@@ -326,7 +326,7 @@ export const LS_MUTED = 'timi2_muted';
 export const LS_HIGH_SCORE = 'timi2_high_score';
 ```
 
-- [ ] **Step 2: Write unit tests for constants.ts**
+- [x] **Step 2: Write unit tests for constants.ts**
 
 Write to `src/constants.test.ts`:
 
