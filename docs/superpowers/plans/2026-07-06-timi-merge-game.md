@@ -21,7 +21,7 @@
 - Modify: `.gitignore` (append entries)
 - Create: `src/`, `public/heroes/`, `public/audio/`, `scripts/` directories
 
-- [ ] **Step 1: Create package.json**
+- [x] **Step 1: Create package.json**
 
 Write to `package.json`:
 
@@ -52,7 +52,7 @@ Write to `package.json`:
 }
 ```
 
-- [ ] **Step 2: Create tsconfig.json**
+- [x] **Step 2: Create tsconfig.json**
 
 Write to `tsconfig.json`:
 
@@ -77,7 +77,7 @@ Write to `tsconfig.json`:
 }
 ```
 
-- [ ] **Step 3: Create vite.config.ts**
+- [x] **Step 3: Create vite.config.ts**
 
 Write to `vite.config.ts`:
 
@@ -97,7 +97,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: Create index.html**
+- [x] **Step 4: Create index.html**
 
 Write to `index.html`:
 
@@ -121,7 +121,7 @@ Write to `index.html`:
 </html>
 ```
 
-- [ ] **Step 5: Append to .gitignore**
+- [x] **Step 5: Append to .gitignore**
 
 Edit `.gitignore` so its full content is:
 
@@ -134,14 +134,14 @@ dist/
 *.local
 ```
 
-- [ ] **Step 6: Create empty directories**
+- [x] **Step 6: Create empty directories**
 
 Run:
 ```
 mkdir -p src/engine src/rendering src/audio src/leaderboard src/ui public/heroes public/audio scripts
 ```
 
-- [ ] **Step 7: Create .gitkeep files for public subdirectories**
+- [x] **Step 7: Create .gitkeep files for public subdirectories**
 
 Run:
 ```
@@ -149,7 +149,7 @@ touch public/heroes/.gitkeep
 touch public/audio/.gitkeep
 ```
 
-- [ ] **Step 8: Install dependencies**
+- [x] **Step 8: Install dependencies**
 
 Run:
 ```
@@ -158,7 +158,7 @@ npm install
 
 Expected: "added N packages" message, no errors. `node_modules/` directory is created.
 
-- [ ] **Step 9: Verify dev server starts**
+- [x] **Step 9: Verify dev server starts**
 
 Run:
 ```
@@ -167,7 +167,7 @@ npm run dev
 
 Expected: Vite dev server starts, shows Local URL (http://localhost:5173). Stop with Ctrl+C after confirming.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add package.json package-lock.json tsconfig.json vite.config.ts index.html .gitignore public/heroes/.gitkeep public/audio/.gitkeep
@@ -408,7 +408,7 @@ describe('constants', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify**
+- [x] **Step 3: Run tests to verify**
 
 Run:
 ```
@@ -417,7 +417,7 @@ npx vitest run
 
 Expected: 10 tests pass, 0 failures.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/constants.ts src/constants.test.ts
@@ -558,7 +558,7 @@ describe('physics', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify**
+- [x] **Step 3: Run tests to verify**
 
 Run:
 ```
@@ -567,7 +567,7 @@ npx vitest run
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/engine/physics.ts src/engine/physics.test.ts
@@ -655,7 +655,7 @@ describe('spawner', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify**
+- [x] **Step 3: Run tests to verify**
 
 Run:
 ```
@@ -664,7 +664,7 @@ npx vitest run
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/engine/spawner.ts src/engine/spawner.test.ts
@@ -802,7 +802,7 @@ describe('merger', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify**
+- [x] **Step 3: Run tests to verify**
 
 Run:
 ```
@@ -811,7 +811,7 @@ npx vitest run
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/engine/merger.ts src/engine/merger.test.ts
@@ -975,7 +975,7 @@ npx tsc --noEmit
 
 Expected: No errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/rendering/canvas.ts
@@ -1141,7 +1141,7 @@ export function isMuteButtonClicked(canvasX: number, canvasY: number): boolean {
 }
 ```
 
-- [ ] **Step 3: Create main.ts — full game loop, scene management, input handling**
+- [x] **Step 3: Create main.ts — full game loop, scene management, input handling**
 
 Write to `src/main.ts`:
 
@@ -1419,7 +1419,7 @@ function init(): void {
 init();
 ```
 
-- [ ] **Step 4: Verify TypeScript compilation**
+- [x] **Step 4: Verify TypeScript compilation**
 
 Run:
 ```
@@ -1430,7 +1430,7 @@ Expected: No errors (this will show errors for missing imports — they will be 
 
 Note: At this point, compilation will fail because `src/audio/audio.ts`, `src/leaderboard/storage.ts`, `src/ui/menu.ts`, and `src/ui/gameover.ts` don't exist yet. The next tasks create these files.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/rendering/animations.ts src/rendering/hud.ts src/main.ts
@@ -1556,7 +1556,7 @@ describe('storage', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify**
+- [x] **Step 3: Run tests to verify**
 
 Run:
 ```
@@ -1565,7 +1565,7 @@ npx vitest run
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/leaderboard/storage.ts src/leaderboard/storage.test.ts
@@ -1880,7 +1880,7 @@ npx tsx scripts/download-audio.ts --dry-run
 
 Expected: Lists ~35 files to download. Reports 0 downloaded, 0 failed.
 
-- [ ] **Step 3: Run the actual download**
+- [x] **Step 3: Run the actual download**
 
 Run:
 ```
@@ -1889,7 +1889,7 @@ npx tsx scripts/download-audio.ts
 
 Expected: Downloads ~35 audio files to `public/audio/`.
 
-- [ ] **Step 4: Verify audio files**
+- [x] **Step 4: Verify audio files**
 
 Run:
 ```
@@ -1898,7 +1898,7 @@ ls public/audio/ | wc -l
 
 Expected output: 35 files (4 Marco Polo + 3 Gan Jiang Mo Ye + 2 Kai + 3 Zhen Ji + 7 Yun Ying + 3 Yu Ji + 5 Xiao Qiao + 4 Cai Wen Ji + 4 Yao).
 
-- [ ] **Step 5: Add audio files to .gitignore and commit**
+- [x] **Step 5: Add audio files to .gitignore and commit**
 
 Run:
 ```
@@ -2071,7 +2071,7 @@ npx tsc --noEmit
 
 Expected: No errors (all imports are now resolved).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/audio/audio.ts
@@ -2103,7 +2103,7 @@ npx vitest run
 
 Expected: All tests pass (constants, physics, spawner, merger, storage — 20+ tests total).
 
-- [ ] **Step 3: Try dev server**
+- [x] **Step 3: Try dev server**
 
 Run:
 ```
@@ -2112,7 +2112,7 @@ npm run dev
 
 Open the browser to verify the game loads without console errors. Expected: Menu screen displays with title, subtitle, and start button.
 
-- [ ] **Step 4: Commit if any fixes were needed**
+- [x] **Step 4: Commit if any fixes were needed**
 
 ```bash
 git add -A
@@ -2153,7 +2153,7 @@ Check that the render section in the game loop calls animations in the correct o
 
 The HUD should be drawn last (on top). Particles and pop animations should be drawn before HUD but after hero bodies.
 
-- [ ] **Step 3: Visual verification**
+- [x] **Step 3: Visual verification**
 
 Run:
 ```
@@ -2165,7 +2165,7 @@ Start a game and drop heroes. When two identical heroes touch and merge, you sho
 - An expanding ring animation (pop effect) around the new hero
 - Particles fade out over ~1 second
 
-- [ ] **Step 4: Commit (if any fixes)**
+- [x] **Step 4: Commit (if any fixes)**
 
 ```bash
 git add src/rendering/animations.ts src/main.ts
@@ -2205,14 +2205,14 @@ Check that `onPointerDown` stores the initial position:
   dragStartY = pos.y;
 ```
 
-- [ ] **Step 3: Manual test**
+- [x] **Step 3: Manual test**
 
 Run `npm run dev`, start a game:
 1. Tap the mute area (top-right HUD corner) — mute indicator should toggle
 2. Drag from the mute area to elsewhere — mute should NOT toggle (drop should happen instead)
 3. Verify mute state persists across page reloads (check localStorage `timi2_muted` key)
 
-- [ ] **Step 4: Commit (if any fixes)**
+- [x] **Step 4: Commit (if any fixes)**
 
 ```bash
 git commit -m "fix: verified mute toggle only activates on short tap, not during drag"
@@ -2258,14 +2258,14 @@ function getCanvasCoords(e: MouseEvent | Touch): { x: number; y: number } {
 }
 ```
 
-- [ ] **Step 3: Manual test at different viewport sizes**
+- [x] **Step 3: Manual test at different viewport sizes**
 
 Run `npm run dev`:
 1. Open in a desktop browser, resize window — game should scale while maintaining 9:16 ratio
 2. Use Chrome DevTools device toolbar, test iPhone SE (375px) and iPhone 14 Pro Max (430px) — game should fit the viewport
 3. Test touch input in mobile device mode — coordinate mapping should remain accurate
 
-- [ ] **Step 4: Commit (if any fixes)**
+- [x] **Step 4: Commit (if any fixes)**
 
 (Skip if no changes.)
 
@@ -2352,7 +2352,7 @@ npx vitest run
 
 Expected: All tests pass including the new integration tests.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/main.test.ts
@@ -2384,11 +2384,11 @@ Check that after `SPAWN_MAX_RETRIES` (3) retries, `endGame()` is called:
       }
 ```
 
-- [ ] **Step 3: Manual test**
+- [x] **Step 3: Manual test**
 
 Run `npm run dev`, start a game, and try to fill the container completely. After the container is too full to spawn, the game should end with "游戏结束" panel after a few retry attempts.
 
-- [ ] **Step 4: Commit (if any fixes)**
+- [x] **Step 4: Commit (if any fixes)**
 
 (Skip if no changes.)
 
@@ -2416,14 +2416,14 @@ export const FONT_STACK = '"PingFang SC", "Microsoft YaHei", "Noto Sans SC", "We
 
 This covers iOS (PingFang SC), Windows (Microsoft YaHei), Android (Noto Sans SC), and Linux (WenQuanYi Micro Hei) with a final sans-serif fallback.
 
-- [ ] **Step 3: Manual test on different devices/platforms**
+- [x] **Step 3: Manual test on different devices/platforms**
 
 Run `npm run dev` and test on:
 1. Desktop Chrome/Firefox — Chinese text renders correctly
 2. Android Chrome (or emulator) — no tofu characters
 3. If available, iOS Safari — text is legible
 
-- [ ] **Step 4: Commit (if any fixes)**
+- [x] **Step 4: Commit (if any fixes)**
 
 (Skip if no changes.)
 
@@ -2460,7 +2460,7 @@ Expected:
 - `dist/index.html` exists
 - `dist/assets/` contains bundled JS and CSS
 
-- [ ] **Step 3: Verify production build output**
+- [x] **Step 3: Verify production build output**
 
 Run:
 ```
@@ -2473,7 +2473,7 @@ Check that:
 - No source maps in production (unless configured)
 - Bundle size is reasonable (<500KB for initial load excluding audio)
 
-- [ ] **Step 4: Test production build locally**
+- [x] **Step 4: Test production build locally**
 
 Run:
 ```
@@ -2492,7 +2492,7 @@ Open the preview URL and verify:
 9. Mute toggle works
 10. Voice lines play on drop and merge (if audio files exist)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .gitignore
@@ -2530,7 +2530,7 @@ Open on a mobile device (or Chrome DevTools mobile emulation):
 - [ ] All UI text is readable at mobile scale
 - [ ] Buttons are large enough to tap comfortably
 
-- [ ] **Step 3: Audio verification**
+- [x] **Step 3: Audio verification**
 
 - [ ] On first game start, AudioContext is created (browser console confirms no autoplay errors)
 - [ ] Dropping a hero plays a random voice line for that hero
@@ -2540,14 +2540,14 @@ Open on a mobile device (or Chrome DevTools mobile emulation):
 - [ ] Mute toggle stops all audio; unmute restores
 - [ ] If audio files are missing for a hero, no error is thrown (silent skip)
 
-- [ ] **Step 4: Performance verification**
+- [x] **Step 4: Performance verification**
 
 - [ ] With 20+ hero bodies on screen, frame rate stays near 60 FPS
 - [ ] No memory leaks after multiple game restart cycles (check browser task manager)
 - [ ] Particle effects do not cause visible frame drops
 - [ ] Canvas rendering uses hardware acceleration (check in Chrome DevTools rendering panel)
 
-- [ ] **Step 5: Edge cases and error handling**
+- [x] **Step 5: Edge cases and error handling**
 
 - [ ] localStorage unavailable: game still works (scores/leaderboard just not persisted)
 - [ ] Reload page mid-game: game resets to menu (expected behavior)
@@ -2556,7 +2556,7 @@ Open on a mobile device (or Chrome DevTools mobile emulation):
 - [ ] Window resize during gameplay: canvas rescales, physics continues correctly
 - [ ] Missing hero avatar images: bubble falls back to text-only display
 
-- [ ] **Step 6: Final commit with version bump**
+- [x] **Step 6: Final commit with version bump**
 
 ```bash
 # If all tests pass, update package.json version if desired
@@ -2702,7 +2702,7 @@ import { CONTAINER_WIDTH, CONTAINER_HEIGHT, HUD_HEIGHT, DEATH_LINE_Y, GAME_OVER_
 } from './constants';
 ```
 
-- [ ] **Step 3: Verify TypeScript compilation**
+- [x] **Step 3: Verify TypeScript compilation**
 
 Run:
 ```
@@ -2711,11 +2711,11 @@ npx tsc --noEmit
 
 Expected: No errors.
 
-- [ ] **Step 4: Manual test**
+- [x] **Step 4: Manual test**
 
 Run `npm run dev`, start a game. While dragging (mouse down), a semi-transparent preview of the next hero should appear below the HUD, tracking the mouse X position.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/rendering/canvas.ts src/main.ts
@@ -2793,7 +2793,7 @@ npx tsc --noEmit
 
 Expected: No errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/audio/audio.ts
