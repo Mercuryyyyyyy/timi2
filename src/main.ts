@@ -66,7 +66,7 @@ function showMenu(): void {
 // ---------------------------------------------------------------------------
 // Scene: Playing
 // ---------------------------------------------------------------------------
-function startGame(): void {
+async function startGame(): Promise<void> {
   score = 0;
   hasYao = false;
   deathTimers.clear();
@@ -76,7 +76,7 @@ function startGame(): void {
 
   engine = createPhysicsEngine();
 
-  initAudio();
+  await initAudio();
   resumeAudio();
   setMuted(muted);
   playBGM();
