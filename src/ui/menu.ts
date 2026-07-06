@@ -62,7 +62,7 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.font = `bold 10px ${FONT_STACK}`;
   ctx.fillStyle = '#e91e63';
   ctx.textAlign = 'center';
-  ctx.fillText('🌟 瑶 + 瑶 = 10000分 + 蝴蝶特效 + 掉落3个小英雄清场', cx, ruleY);
+  ctx.fillText('🌟 瑶 + 瑶 = 10000分 + 蝴蝶特效 + 底部掉落3个小英雄', cx, ruleY);
   ctx.restore();
 
   ruleY += 22;
