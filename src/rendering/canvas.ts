@@ -14,18 +14,13 @@ import { getHeroBodies } from '../engine/physics';
 const IMAGE_EXTENSIONS = ['.png', '.jpg'] as const;
 
 const imageCache = new Map<string, HTMLImageElement>();
-const imageLoadAttempted = new Set<string>();
 
 function tryLoadImage(path: string): HTMLImageElement | null {
   if (imageCache.has(path)) return imageCache.get(path)!;
-  if (imageLoadAttempted.has(path)) return null; // already tried and failed
-
-  imageLoadAttempted.add(path);
   const img = new Image();
   img.src = path;
-  img.onload = () => imageCache.set(path, img);
-  img.onerror = () => { /* silently fail, will draw gradient fallback */ };
-  return null; // not loaded yet
+  imageCache.set(path, img); // Cache immediately so we don't create new Image() each frame
+  return img; // Return the img element — it might still be loading, caller checks .complete
 }
 
 // ---------------------------------------------------------------------------
@@ -33,13 +28,13 @@ function tryLoadImage(path: string): HTMLImageElement | null {
 // ---------------------------------------------------------------------------
 
 export function renderBackground(ctx: CanvasRenderingContext2D): void {
-  // Full page background
+  // Full canvas background using logical dimensions (matches CONTAINER_WIDTH × CONTAINER_HEIGHT+HUD_HEIGHT)
   ctx.fillStyle = COLOR_BACKGROUND;
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.fillRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
 }
 
 export function renderContainer(ctx: CanvasRenderingContext2D): void {
-  const x = (ctx.canvas.width - CONTAINER_WIDTH) / 2;
+  const x = (CONTAINER_WIDTH - CONTAINER_WIDTH) / 2;
   const y = HUD_HEIGHT;
 
   // Container background
@@ -100,12 +95,15 @@ export function renderHeroBodies(
     const r = heroDef.radius;
     const imagePath = getHeroImagePath(tier, heroDef.nameEn);
 
-    // Try to load/use hero image
+    // Try to load/use hero image — only use if loaded successfully
     let img: HTMLImageElement | null = null;
     for (const ext of IMAGE_EXTENSIONS) {
       const fullPath = imagePath + ext;
       const loaded = tryLoadImage(fullPath);
-      if (loaded) { img = loaded; break; }
+      if (loaded && loaded.complete && loaded.naturalWidth > 0) {
+        img = loaded;
+        break;
+      }
     }
 
     // Draw circle fill
@@ -176,7 +174,7 @@ export interface HUDData {
 }
 
 export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
-  const w = ctx.canvas.width;
+  const w = CONTAINER_WIDTH;
 
   // Semi-transparent bar
   const barY = 0;
@@ -218,7 +216,10 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
     let img: HTMLImageElement | null = null;
     for (const ext of IMAGE_EXTENSIONS) {
       const loaded = tryLoadImage(imagePath + ext);
-      if (loaded) { img = loaded; break; }
+      if (loaded && loaded.complete && loaded.naturalWidth > 0) {
+        img = loaded;
+        break;
+      }
     }
 
     // Draw fill
@@ -270,8 +271,8 @@ function shadeColor(color: string, percent: number): string {
 // Coordinate helpers
 // ---------------------------------------------------------------------------
 
-export function getContainerOffsetX(canvas: HTMLCanvasElement): number {
-  return (canvas.width - CONTAINER_WIDTH) / 2;
+export function getContainerOffsetX(_canvas: HTMLCanvasElement): number {
+  return 0;
 }
 
 export function getContainerOffsetY(): number {

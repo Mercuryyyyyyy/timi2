@@ -78,12 +78,12 @@ export const SPAWN_TABLE: SpawnEntry[] = [
 // Physics constants
 // ---------------------------------------------------------------------------
 
-export const GRAVITY = 1.5;
+export const GRAVITY = 0.8;
 export const CONTAINER_WIDTH = 360;
 export const CONTAINER_HEIGHT = 640;
-export const RESTITUTION = 0.3;
-export const FRICTION = 0.1;
-export const FRICTION_AIR = 0.01;
+export const RESTITUTION = 0.5;
+export const FRICTION = 0.05;
+export const FRICTION_AIR = 0.001;
 export const DEATH_LINE_Y = 35;
 export const GAME_OVER_DURATION_MS = 1000;
 export const MAX_VELOCITY = 15;

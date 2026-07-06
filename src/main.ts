@@ -39,16 +39,27 @@ const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 // Canvas setup & resize
 // ---------------------------------------------------------------------------
 function resizeCanvas(): void {
-  canvas.width = CONTAINER_WIDTH;
-  canvas.height = CONTAINER_HEIGHT + HUD_HEIGHT;
-  const scaleX = window.innerWidth / CONTAINER_WIDTH;
-  const scaleY = window.innerHeight / (CONTAINER_HEIGHT + HUD_HEIGHT);
+  const dpr = window.devicePixelRatio || 1;
+  const logicalWidth = CONTAINER_WIDTH;
+  const logicalHeight = CONTAINER_HEIGHT + HUD_HEIGHT;
+
+  canvas.width = logicalWidth * dpr;
+  canvas.height = logicalHeight * dpr;
+
+  const scaleX = window.innerWidth / logicalWidth;
+  const scaleY = window.innerHeight / logicalHeight;
   const scale = Math.min(scaleX, scaleY);
-  canvas.style.width = `${CONTAINER_WIDTH * scale}px`;
-  canvas.style.height = `${(CONTAINER_HEIGHT + HUD_HEIGHT) * scale}px`;
+
+  canvas.style.width = `${logicalWidth * scale}px`;
+  canvas.style.height = `${logicalHeight * scale}px`;
   canvas.style.position = 'absolute';
-  canvas.style.left = `${(window.innerWidth - CONTAINER_WIDTH * scale) / 2}px`;
-  canvas.style.top = `${(window.innerHeight - (CONTAINER_HEIGHT + HUD_HEIGHT) * scale) / 2}px`;
+  canvas.style.left = `${(window.innerWidth - logicalWidth * scale) / 2}px`;
+  canvas.style.top = `${(window.innerHeight - logicalHeight * scale) / 2}px`;
+
+  // Scale context to map logical coordinates to physical DPR pixels
+  if (ctx) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -58,7 +69,7 @@ function showMenu(): void {
   scene = 'menu';
   if (ctx) {
     ctx.fillStyle = '#fce4ec';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
     drawMenu(ctx);
   }
 }
@@ -99,7 +110,7 @@ function gameLoop(timestamp: number): void {
     return;
   }
 
-  // Step physics
+  // Step physics (delta is capped at MAX_DELTA_MS to prevent spiral-of-death)
   Matter.Engine.update(engine, delta);
   for (const body of Matter.Composite.allBodies(engine.world)) {
     clampBodyVelocity(body);
@@ -148,7 +159,7 @@ function gameLoop(timestamp: number): void {
 function renderFrame(): void {
   if (!ctx || !engine) return;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
   renderBackground(ctx);
   renderContainer(ctx);
 
@@ -214,7 +225,7 @@ function endGame(): void {
   const isNewRecord = score >= highScore && score > 0;
 
   if (ctx && engine) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
     renderBackground(ctx);
     renderContainer(ctx);
     const ox = getContainerOffsetX(canvas);
@@ -229,9 +240,11 @@ function endGame(): void {
 // ---------------------------------------------------------------------------
 function getCanvasCoords(e: MouseEvent | Touch): { x: number; y: number } {
   const rect = canvas.getBoundingClientRect();
+  const logicalWidth = CONTAINER_WIDTH;
+  const logicalHeight = CONTAINER_HEIGHT + HUD_HEIGHT;
   return {
-    x: (e.clientX - rect.left) * (canvas.width / rect.width),
-    y: (e.clientY - rect.top) * (canvas.height / rect.height),
+    x: (e.clientX - rect.left) * (logicalWidth / rect.width),
+    y: (e.clientY - rect.top) * (logicalHeight / rect.height),
   };
 }
 
@@ -269,7 +282,9 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
   if (!hero) return;
 
   const spawnX = Math.max(hero.radius + 5, Math.min(CONTAINER_WIDTH - hero.radius - 5, worldX));
-  createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: spawnX, y: worldY });
+  const body = createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: spawnX, y: worldY });
+  // Give a small initial velocity for visual feedback
+  Matter.Body.setVelocity(body, { x: 0, y: 2 });
   playHeroVoice(hero.tier);
 }
 
@@ -293,7 +308,7 @@ canvas.addEventListener('touchend', onPointerUp);
 
 window.addEventListener('resize', resizeCanvas);
 
-resizeCanvas();
 ctx = canvas.getContext('2d');
 if (!ctx) throw new Error('Cannot get 2D context');
+resizeCanvas();
 showMenu();
