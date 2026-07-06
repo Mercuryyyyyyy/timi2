@@ -1,4 +1,4 @@
-import { HERO_CHAIN, CONTAINER_WIDTH, HUD_HEIGHT, type HeroDefinition } from '../constants';
+import { HERO_CHAIN, type HeroDefinition } from '../constants';
 import { previewNextTier } from '../engine/spawner';
 
 let _cachedNextTier: number | null = null;
@@ -16,9 +16,4 @@ export function consumeNextHero(): HeroDefinition | null {
   const hero = getNextHero();
   _cachedNextTier = previewNextTier();
   return hero;
-}
-
-/** Check if coordinates are inside the mute button area. */
-export function isMuteButtonClicked(x: number, y: number): boolean {
-  return y < HUD_HEIGHT && x > CONTAINER_WIDTH - 50;
 }

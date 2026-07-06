@@ -23,7 +23,7 @@ export interface SpawnEntry {
 }
 
 /** Game scene states. */
-export type GameScene = 'menu' | 'playing' | 'gameover';
+export type GameScene = 'menu' | 'loading' | 'playing' | 'gameover';
 
 /** A single particle in the animation system. */
 export interface Particle {

@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 import {
   CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, GAME_OVER_DURATION_MS, MAX_DELTA_MS,
-  HUD_HEIGHT, type GameScene, HERO_CHAIN, type HeroDefinition,
+  HUD_HEIGHT, type GameScene, HERO_CHAIN, type HeroDefinition, getHeroByTier,
 } from './constants';
 import { createPhysicsEngine, createHeroBody, clampBodyVelocity, getHeroBodies } from './engine/physics';
 import { processMerges } from './engine/merger';
@@ -10,15 +10,19 @@ import {
   getContainerOffsetX, getContainerOffsetY, isInsideContainer, animateMerge,
   setDropPreview, renderDropPreview,
   triggerButterflyBloom, updateAndDrawButterflies, clearButterflies,
+  renderPauseOverlay,
+  isPauseClicked, isRestartClicked, isSettingsClicked, isMuteClicked,
+  spawnScorePop, updateAndDrawScorePops, clearScorePops,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
   getParticles,
 } from './rendering/animations';
-import { consumeNextHero, isMuteButtonClicked } from './rendering/hud';
+import { consumeNextHero } from './rendering/hud';
 import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
+import { drawSettings, isSoundToggleClicked } from './ui/settings';
 import { drawGameOver, isReplayClicked, isHomeClicked } from './ui/gameover';
 
 // ---------------------------------------------------------------------------
@@ -30,6 +34,11 @@ let score = 0;
 let highScore = 0;
 let muted = false;
 let hasYao = false;
+let isPaused = false;
+let showSettings = false;
+let pausedBySettings = false;
+let highestTier = 1;
+let mergeCount = 0;
 let lastTime = 0;
 let rafId = 0;
 let ctx: CanvasRenderingContext2D | null = null;
@@ -85,11 +94,23 @@ function showMenu(): void {
 // Scene: Playing
 // ---------------------------------------------------------------------------
 async function startGame(): Promise<void> {
+  // Cancel any running game loop and prevent the old loop from continuing
+  cancelAnimationFrame(rafId);
+  scene = 'loading';
   score = 0;
   hasYao = false;
+  isPaused = false;
+  showSettings = false;
+  pausedBySettings = false;
+  highestTier = 1;
+  mergeCount = 0;
+  isDragging = false;
+  dragX = null;
+  setDropPreview(null);
   deathTimers.clear();
   clearAnimations();
   clearButterflies();
+  clearScorePops();
   try { highScore = readHighScore(); } catch { highScore = 0; }
   try { muted = readMuted(); } catch { muted = false; }
 
@@ -111,8 +132,19 @@ async function startGame(): Promise<void> {
   rafId = requestAnimationFrame(gameLoop);
 }
 
+function togglePause(): void {
+  if (scene !== 'playing' || !engine) return;
+  isPaused = !isPaused;
+  if (isPaused) {
+    cancelAnimationFrame(rafId);
+  } else {
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(gameLoop);
+  }
+}
+
 function gameLoop(timestamp: number): void {
-  if (scene !== 'playing') return;
+  if (scene !== 'playing' || isPaused) return;
   const delta = Math.min(timestamp - lastTime, MAX_DELTA_MS);
   lastTime = timestamp;
 
@@ -135,11 +167,17 @@ function gameLoop(timestamp: number): void {
   for (const result of mergeResults) {
     score += result.scoreDelta;
     if (result.created) {
-      animateMerge(result.created.id);
       const heroDef = HERO_CHAIN.find(h => h.tier === (result.created as any).heroTier);
       if (heroDef) {
+        animateMerge(result.created.id);
         spawnParticles(result.created.position.x, result.created.position.y, heroDef.color);
         startPopAnimation(result.created.position.x, result.created.position.y, heroDef.radius, heroDef);
+
+        // Track highest tier and merge count
+        if (heroDef.tier > highestTier) highestTier = heroDef.tier;
+        mergeCount++;
+        // Spawn floating score pop at merge position
+        spawnScorePop(result.created.position.x, result.created.position.y, result.scoreDelta);
 
         if (heroDef.tier === 11) {
           playYaoSpecial(); // Custom 那艺娜 audio instead of 瑶 voice
@@ -232,12 +270,32 @@ function renderFrame(delta: number): void {
   drawPopAnimations(ctx);
   ctx.restore();
 
+  // Score pop floating text
+  updateAndDrawScorePops(ctx, ox, oy);
+
+  // Compute highest tier name for HUD
+  const highestTierHero = getHeroByTier(highestTier);
+  const highestTierName = highestTierHero ? highestTierHero.nameZh : '';
+
   // HUD
   renderHUD(ctx, {
     score,
     highScore,
     isMuted: muted,
+    isPaused,
+    highestTierName,
+    mergeCount,
   });
+
+  // Pause overlay (drawn first so settings can appear on top)
+  if (isPaused) {
+    renderPauseOverlay(ctx);
+  }
+
+  // Settings overlay (drawn last so it's on top when both are active)
+  if (showSettings) {
+    drawSettings(ctx, muted);
+  }
 }
 
 function checkGameOver(deltaMs: number): boolean {
@@ -316,8 +374,75 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
   }
   if (scene !== 'playing' || !engine) return;
 
-  // Mute toggle (check first — it's in the HUD, outside the container)
-  if (isMuteButtonClicked(pos.x, pos.y)) {
+  // Handle settings panel (if open)
+  if (showSettings) {
+    if (isSettingsClicked(pos.x, pos.y)) {
+      showSettings = false;
+      // Resume only if game was auto-paused by settings (not user-initiated)
+      if (pausedBySettings) {
+        pausedBySettings = false;
+        isPaused = false;
+        lastTime = performance.now();
+        rafId = requestAnimationFrame(gameLoop);
+      }
+      return;
+    }
+    if (isSoundToggleClicked(pos.x, pos.y)) {
+      muted = !muted;
+      setMuted(muted);
+      try { writeMuted(muted); } catch {}
+      return;
+    }
+    // Clicks outside sound toggle in settings panel do nothing
+    return;
+  }
+
+  // Handle pause overlay — tap anywhere outside buttons to resume
+  if (isPaused) {
+    // Check if hit any HUD button
+    if (isPauseClicked(pos.x, pos.y)) {
+      togglePause();
+      return;
+    }
+    if (isRestartClicked(pos.x, pos.y)) {
+      startGame();
+      return;
+    }
+    if (isSettingsClicked(pos.x, pos.y)) {
+      showSettings = true;
+      return;
+    }
+    if (isMuteClicked(pos.x, pos.y)) {
+      muted = !muted;
+      setMuted(muted);
+      try { writeMuted(muted); } catch {}
+      return;
+    }
+    // Anywhere else during pause → resume
+    togglePause();
+    return;
+  }
+
+  // HUD button clicks (when not paused)
+  if (isPauseClicked(pos.x, pos.y)) {
+    togglePause();
+    return;
+  }
+  if (isRestartClicked(pos.x, pos.y)) {
+    startGame();
+    return;
+  }
+  if (isSettingsClicked(pos.x, pos.y)) {
+    showSettings = true;
+    // Auto-pause the game when settings panel is open
+    if (!isPaused) {
+      isPaused = true;
+      pausedBySettings = true;
+      cancelAnimationFrame(rafId);
+    }
+    return;
+  }
+  if (isMuteClicked(pos.x, pos.y)) {
     muted = !muted;
     setMuted(muted);
     try { writeMuted(muted); } catch {}
@@ -337,7 +462,7 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
 }
 
 function onPointerMove(e: MouseEvent | TouchEvent): void {
-  if (!isDragging || scene !== 'playing') return;
+  if (!isDragging || scene !== 'playing' || isPaused || showSettings) return;
   const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
   const worldX = pos.x - getContainerOffsetX(canvas);
   dragX = Math.max(readyHero ? readyHero.radius + 5 : 10, Math.min(CONTAINER_WIDTH - (readyHero ? readyHero.radius + 5 : 10), worldX));
@@ -345,7 +470,7 @@ function onPointerMove(e: MouseEvent | TouchEvent): void {
 }
 
 function onPointerUp(_e: MouseEvent | TouchEvent): void {
-  if (!isDragging || scene !== 'playing' || !engine || !readyHero) {
+  if (!isDragging || scene !== 'playing' || !engine || !readyHero || isPaused || showSettings) {
     isDragging = false;
     return;
   }

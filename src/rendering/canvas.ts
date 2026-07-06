@@ -342,21 +342,46 @@ export function clearButterflies(): void {
 }
 
 // ---------------------------------------------------------------------------
+// HUD button layout constants
+// ---------------------------------------------------------------------------
+
+const HUD_BUTTON_RADIUS = 14;
+const BUTTON_START_X = CONTAINER_WIDTH - 4 * (HUD_BUTTON_RADIUS * 2 + 4);
+const BUTTON_PAUSE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 2;
+const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_RADIUS * 2 + 4;
+const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_RADIUS * 2 + 4;
+const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_RADIUS * 2 + 4;
+
+function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string): void {
+  ctx.save();
+  ctx.font = `16px ${FONT_STACK}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, cx, cy);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
 // HUD
 // ---------------------------------------------------------------------------
 
 export interface HUDData {
   score: number;
   highScore: number;
-  isMuted?: boolean;
+  nextTier?: number;
+  isMuted: boolean;
+  isPaused: boolean;
+  highestTierName: string; // name of highest tier merged so far
+  mergeCount: number;      // total number of merges
 }
 
 export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   const w = CONTAINER_WIDTH;
-
-  // Semi-transparent bar
   const barY = 0;
   const barH = HUD_HEIGHT;
+  const cy = barH / 2;
+
+  // Semi-transparent bar
   ctx.save();
   ctx.fillStyle = COLOR_HUD_BG;
   ctx.fillRect(0, barY, w, barH);
@@ -372,16 +397,115 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.fillStyle = COLOR_ACCENT;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`🏆 ${data.score}`, 12, barH / 2);
+  ctx.fillText(`🏆 ${data.score}`, 12, cy);
   ctx.restore();
 
-  // Center: High score
+  // Center-right: Highest tier merged
+  if (data.highestTierName) {
+    ctx.save();
+    ctx.font = `11px ${FONT_STACK}`;
+    ctx.fillStyle = '#999999';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`最高合成: ${data.highestTierName}`, BUTTON_START_X - 8, cy);
+    ctx.restore();
+  }
+
+  // Render HUD buttons (pause, restart, settings, mute)
+  drawHUDButton(ctx, BUTTON_PAUSE_CX, cy, data.isPaused ? '▶' : '⏸');
+  drawHUDButton(ctx, BUTTON_RESTART_CX, cy, '🔄');
+  drawHUDButton(ctx, BUTTON_SETTINGS_CX, cy, '⚙');
+  drawHUDButton(ctx, BUTTON_MUTE_CX, cy, data.isMuted ? '🔇' : '🔊');
+}
+
+// ---------------------------------------------------------------------------
+// HUD button hit-test functions
+// ---------------------------------------------------------------------------
+
+function isInsideButton(x: number, y: number, cx: number, cy: number, r: number): boolean {
+  return y >= 0 && y < HUD_HEIGHT && Math.abs(x - cx) <= r && Math.abs(y - cy) <= r;
+}
+
+export function isPauseClicked(x: number, y: number): boolean {
+  return isInsideButton(x, y, BUTTON_PAUSE_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
+}
+
+export function isRestartClicked(x: number, y: number): boolean {
+  return isInsideButton(x, y, BUTTON_RESTART_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
+}
+
+export function isSettingsClicked(x: number, y: number): boolean {
+  return isInsideButton(x, y, BUTTON_SETTINGS_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
+}
+
+export function isMuteClicked(x: number, y: number): boolean {
+  return isInsideButton(x, y, BUTTON_MUTE_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
+}
+
+// ---------------------------------------------------------------------------
+// Pause overlay
+// ---------------------------------------------------------------------------
+
+export function renderPauseOverlay(ctx: CanvasRenderingContext2D): void {
   ctx.save();
-  ctx.font = `11px ${FONT_STACK}`;
-  ctx.fillStyle = '#999999';
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
+
+  const cx = CONTAINER_WIDTH / 2;
+  const cy = (CONTAINER_HEIGHT + HUD_HEIGHT) / 2;
+
+  ctx.font = `bold 28px ${FONT_STACK}`;
+  ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
-  ctx.fillText(`最高: ${data.highScore}`, w / 2, barH / 2);
+  ctx.fillText('⏸ 已暂停', cx, cy - 20);
+
+  ctx.font = `14px ${FONT_STACK}`;
+  ctx.fillStyle = '#ccc';
+  ctx.fillText('点击任意位置继续', cx, cy + 20);
   ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Score pop animations (floating +score text)
+// ---------------------------------------------------------------------------
+
+interface ScorePop {
+  x: number; y: number; text: string;
+  life: number; maxLife: number;
+}
+
+let scorePops: ScorePop[] = [];
+
+export function spawnScorePop(worldX: number, worldY: number, score: number): void {
+  scorePops.push({
+    x: worldX, y: worldY,
+    text: `+${score}`,
+    life: 0, maxLife: 40,
+  });
+}
+
+export function updateAndDrawScorePops(ctx: CanvasRenderingContext2D, ox: number, oy: number): void {
+  for (let i = scorePops.length - 1; i >= 0; i--) {
+    const p = scorePops[i];
+    p.life++;
+    const alpha = 1 - (p.life / p.maxLife);
+    const yOffset = -30 * (p.life / p.maxLife); // float upward
+    if (p.life >= p.maxLife) {
+      scorePops.splice(i, 1);
+    } else {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = `bold 16px ${FONT_STACK}`;
+      ctx.fillStyle = '#ffd700';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.text, ox + p.x, oy + p.y + yOffset);
+      ctx.restore();
+    }
+  }
+}
+
+export function clearScorePops(): void {
+  scorePops = [];
 }
 
 // ---------------------------------------------------------------------------
