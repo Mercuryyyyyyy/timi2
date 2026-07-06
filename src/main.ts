@@ -7,7 +7,7 @@ import { createPhysicsEngine, createHeroBody, clampBodyVelocity, getHeroBodies }
 import { processMerges } from './engine/merger';
 import {
   renderBackground, renderContainer, renderHeroBodies, renderParticles, renderHUD,
-  getContainerOffsetX, getContainerOffsetY,
+  getContainerOffsetX, getContainerOffsetY, isInsideContainer,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
@@ -124,6 +124,12 @@ function gameLoop(timestamp: number): void {
     }
   }
 
+  // Clean up death timers for removed (merged) bodies
+  const currentBodies = new Set(getHeroBodies(engine.world).map(b => b.id));
+  for (const [id] of deathTimers) {
+    if (!currentBodies.has(id)) deathTimers.delete(id);
+  }
+
   // Game-over check
   if (checkGameOver(delta)) {
     endGame();
@@ -173,11 +179,6 @@ function renderFrame(): void {
 function checkGameOver(deltaMs: number): boolean {
   if (!engine) return false;
   const heroBodies = getHeroBodies(engine.world);
-  // Clean up death-timer entries for bodies that no longer exist
-  const liveBodyIds = new Set(heroBodies.map(b => b.id));
-  for (const id of deathTimers.keys()) {
-    if (!liveBodyIds.has(id)) deathTimers.delete(id);
-  }
   for (const body of heroBodies) {
     const radius: number = (body as any).heroRadius ?? 0;
     const topEdge = body.position.y - radius;
@@ -249,13 +250,17 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
   }
   if (scene !== 'playing' || !engine) return;
 
-  // Mute toggle
+  // Mute toggle (check first — it's in the HUD, outside the container)
   if (isMuteButtonClicked(pos.x, pos.y)) {
     muted = !muted;
     setMuted(muted);
     try { writeMuted(muted); } catch {}
     return;
   }
+
+  // Only spawn if tapping inside the game container area
+  const inContainer = isInsideContainer(pos.x, pos.y, canvas);
+  if (!inContainer) return;
 
   // Spawn hero on tap
   const worldX = pos.x - getContainerOffsetX(canvas);
