@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 import {
   HERO_CHAIN, CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, HUD_HEIGHT,
   COLOR_BACKGROUND, COLOR_CONTAINER_GRADIENT_TOP, COLOR_CONTAINER_GRADIENT_BOTTOM,
-  COLOR_CONTAINER_BORDER, COLOR_HUD_BG, COLOR_ACCENT, COLOR_WHITE,
+  COLOR_CONTAINER_BORDER, COLOR_HUD_BG, COLOR_ACCENT,
   FONT_STACK, getHeroImagePath, type Particle,
 } from '../constants';
 import { getHeroBodies } from '../engine/physics';
@@ -45,23 +45,52 @@ export function animateMerge(bodyId: number): void {
 // ---------------------------------------------------------------------------
 
 let dropPreviewX: number | null = null;
+let previewTier: number | null = null;
 
-export function setDropPreview(x: number | null): void {
+export function setDropPreview(x: number | null, tier?: number): void {
   dropPreviewX = x;
+  previewTier = tier ?? null;
 }
 
 export function renderDropPreview(ctx: CanvasRenderingContext2D, ox: number, oy: number): void {
-  if (dropPreviewX === null) return;
-  // Draw a subtle dashed line from top to bottom at preview X
+  if (dropPreviewX === null || !previewTier) return;
+  const hero = HERO_CHAIN.find(h => h.tier === previewTier);
+  if (!hero) return;
+  const r = hero.radius;
+  const x = ox + dropPreviewX;
+  const y = oy + 40;
+
+  // Dashed guide line from preview ball to container bottom
   ctx.save();
   ctx.setLineDash([4, 6]);
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(ox + dropPreviewX, oy + 40);
-  ctx.lineTo(ox + dropPreviewX, oy + CONTAINER_HEIGHT - 10);
+  ctx.moveTo(x, y + r);
+  ctx.lineTo(x, oy + CONTAINER_HEIGHT - 10);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  // Semi-transparent preview ball
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  const img = getHeroImg(hero.tier, hero.nameEn);
+  if (img) {
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = hero.color;
+    ctx.fill();
+  }
+  // Border on fresh path (clip/fill consumed the previous path)
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -228,7 +257,6 @@ export function renderParticles(ctx: CanvasRenderingContext2D, particles: Partic
 export interface HUDData {
   score: number;
   highScore: number;
-  nextTier: number;
   isMuted?: boolean;
 }
 
@@ -263,45 +291,6 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.textAlign = 'center';
   ctx.fillText(`最高: ${data.highScore}`, w / 2, barH / 2);
   ctx.restore();
-
-  // Right: Next hero preview
-  const nextHero = HERO_CHAIN.find(h => h.tier === data.nextTier);
-  if (nextHero) {
-    const previewX = w - 40;
-    const previewY = barH / 2;
-    const previewR = 16;
-
-    const img = getHeroImg(nextHero.tier, nextHero.nameEn);
-
-    // Draw fill
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(previewX, previewY, previewR, 0, Math.PI * 2);
-
-    if (img) {
-      ctx.clip();
-      ctx.drawImage(img, previewX - previewR, previewY - previewR, previewR * 2, previewR * 2);
-    } else {
-      ctx.fillStyle = nextHero.color;
-      ctx.fill();
-    }
-    ctx.restore();
-
-    // Border (fresh path — clip() consumed the previous path)
-    ctx.beginPath();
-    ctx.arc(previewX, previewY, previewR, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // "Next" label
-    ctx.save();
-    ctx.font = `10px ${FONT_STACK}`;
-    ctx.fillStyle = '#888888';
-    ctx.textAlign = 'right';
-    ctx.fillText('下个', previewX - previewR - 8, previewY);
-    ctx.restore();
-  }
 }
 
 // ---------------------------------------------------------------------------

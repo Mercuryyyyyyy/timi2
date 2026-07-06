@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 import {
   CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, GAME_OVER_DURATION_MS, MAX_DELTA_MS,
-  HUD_HEIGHT, type GameScene, HERO_CHAIN,
+  HUD_HEIGHT, type GameScene, HERO_CHAIN, type HeroDefinition,
 } from './constants';
 import { createPhysicsEngine, createHeroBody, clampBodyVelocity, getHeroBodies } from './engine/physics';
 import { processMerges } from './engine/merger';
@@ -14,7 +14,7 @@ import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
   getParticles,
 } from './rendering/animations';
-import { getNextHero, consumeNextHero, isMuteButtonClicked } from './rendering/hud';
+import { consumeNextHero, isMuteButtonClicked } from './rendering/hud';
 import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
@@ -33,6 +33,11 @@ let lastTime = 0;
 let rafId = 0;
 let ctx: CanvasRenderingContext2D | null = null;
 const deathTimers = new Map<number, number>();
+
+// Drag-to-position preview state
+let readyHero: HeroDefinition | null = null;
+let dragX: number | null = null;
+let isDragging = false;
 
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 
@@ -95,6 +100,9 @@ async function startGame(): Promise<void> {
 
   // Preload initial voice data
   preloadAllAudio();
+
+  // Initialize first hero preview
+  readyHero = consumeNextHero();
 
   scene = 'playing';
   lastTime = performance.now();
@@ -174,12 +182,17 @@ function gameLoop(timestamp: number): void {
 function renderFrame(): void {
   if (!ctx || !engine) return;
 
-    ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
+  ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
   renderBackground(ctx);
   renderContainer(ctx);
 
   const ox = getContainerOffsetX(canvas);
   const oy = getContainerOffsetY();
+
+  // Update preview position when not actively dragging
+  if (!isDragging && readyHero) {
+    setDropPreview(CONTAINER_WIDTH / 2, readyHero.tier);
+  }
 
   // Drop preview line
   renderDropPreview(ctx, ox, oy);
@@ -200,7 +213,6 @@ function renderFrame(): void {
   renderHUD(ctx, {
     score,
     highScore,
-    nextTier: getNextHero()?.tier ?? 1,
     isMuted: muted,
   });
 }
@@ -289,44 +301,42 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
     return;
   }
 
-  // Only spawn if tapping inside the game container area
+  // Only allow drag/interaction inside the game container
   const inContainer = isInsideContainer(pos.x, pos.y, canvas);
   if (!inContainer) return;
 
-  // Spawn hero on tap
+  // Start dragging — show preview
+  isDragging = true;
   const worldX = pos.x - getContainerOffsetX(canvas);
-  const worldY = -20; // spawn above container
-  const hero = consumeNextHero();
-  if (!hero) return;
-
-  const spawnX = Math.max(hero.radius + 5, Math.min(CONTAINER_WIDTH - hero.radius - 5, worldX));
-  const body = createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: spawnX, y: worldY });
-  // Give a small initial velocity for visual feedback
-  Matter.Body.setVelocity(body, { x: 0, y: 2 });
-  playHeroVoice(hero.tier);
-  setDropPreview(null);
+  const clampMargin = readyHero ? readyHero.radius + 5 : 10;
+  dragX = Math.max(clampMargin, Math.min(CONTAINER_WIDTH - clampMargin, worldX));
+  setDropPreview(dragX, readyHero?.tier);
 }
 
 function onPointerMove(e: MouseEvent | TouchEvent): void {
-  e.preventDefault();
+  if (!isDragging || scene !== 'playing') return;
   const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
-
-  if (scene !== 'playing' || !engine) {
-    setDropPreview(null);
-    return;
-  }
-
-  const inContainer = isInsideContainer(pos.x, pos.y, canvas);
-  if (!inContainer) {
-    setDropPreview(null);
-    return;
-  }
-
   const worldX = pos.x - getContainerOffsetX(canvas);
-  setDropPreview(worldX);
+  dragX = Math.max(readyHero ? readyHero.radius + 5 : 10, Math.min(CONTAINER_WIDTH - (readyHero ? readyHero.radius + 5 : 10), worldX));
+  setDropPreview(dragX, readyHero?.tier);
 }
 
 function onPointerUp(_e: MouseEvent | TouchEvent): void {
+  if (!isDragging || scene !== 'playing' || !engine || !readyHero) {
+    isDragging = false;
+    return;
+  }
+  isDragging = false;
+  const hero = readyHero;
+  const spawnX = dragX ?? CONTAINER_WIDTH / 2;
+  readyHero = consumeNextHero(); // prepare next hero
+
+  const worldY = -20;
+  const body = createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: spawnX, y: worldY });
+  // Give initial downward velocity for weighty feel — bigger heroes drop harder
+  Matter.Body.setVelocity(body, { x: 0, y: 3 + hero.tier * 0.5 });
+  playHeroVoice(hero.tier);
+
   setDropPreview(null);
 }
 
@@ -339,6 +349,14 @@ canvas.addEventListener('mousemove', onPointerMove);
 canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 canvas.addEventListener('mouseup', onPointerUp);
 canvas.addEventListener('touchend', onPointerUp);
+
+// Reset drag state if mouse is released outside the canvas
+window.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    setDropPreview(null);
+  }
+});
 
 window.addEventListener('resize', resizeCanvas);
 

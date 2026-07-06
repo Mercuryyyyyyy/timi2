@@ -42,17 +42,17 @@ export interface Particle {
 // ---------------------------------------------------------------------------
 
 export const HERO_CHAIN: HeroDefinition[] = [
-  { tier: 1,  nameZh: '马可波罗', nameEn: 'marco_polo',      heroId: 132, color: '#87CEEB', radius: 25, score: 0 },
-  { tier: 2,  nameZh: '不知火舞', nameEn: 'buzhihuowu',      heroId: 157, color: '#FFB6C1', radius: 28, score: 10 },
-  { tier: 3,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_xie', heroId: 182, color: '#DDA0DD', radius: 31, score: 20 },
-  { tier: 4,  nameZh: '铠',       nameEn: 'kai',             heroId: 193, color: '#B0C4DE', radius: 34, score: 40 },
-  { tier: 5,  nameZh: '甄姬',     nameEn: 'zhen_ji',         heroId: 127, color: '#98FB98', radius: 37, score: 80 },
-  { tier: 6,  nameZh: '云缨',     nameEn: 'yun_ying',        heroId: 538, color: '#FFDAB9', radius: 40, score: 160 },
+  { tier: 1,  nameZh: '马可波罗', nameEn: 'marco_polo',      heroId: 132, color: '#87CEEB', radius: 24, score: 0 },
+  { tier: 2,  nameZh: '不知火舞', nameEn: 'buzhihuowu',      heroId: 157, color: '#FFB6C1', radius: 25, score: 10 },
+  { tier: 3,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_xie', heroId: 182, color: '#DDA0DD', radius: 27, score: 20 },
+  { tier: 4,  nameZh: '铠',       nameEn: 'kai',             heroId: 193, color: '#B0C4DE', radius: 30, score: 40 },
+  { tier: 5,  nameZh: '甄姬',     nameEn: 'zhen_ji',         heroId: 127, color: '#98FB98', radius: 33, score: 80 },
+  { tier: 6,  nameZh: '云缨',     nameEn: 'yun_ying',        heroId: 538, color: '#FFDAB9', radius: 38, score: 160 },
   { tier: 7,  nameZh: '海诺',     nameEn: 'hai_nuo',         heroId: 563, color: '#E6E6FA', radius: 43, score: 320 },
-  { tier: 8,  nameZh: '虞姬',     nameEn: 'yu_ji',           heroId: 174, color: '#AFEEEE', radius: 46, score: 640 },
-  { tier: 9,  nameZh: '小乔',     nameEn: 'xiao_qiao',       heroId: 106, color: '#FFB6C1', radius: 49, score: 1280 },
-  { tier: 10, nameZh: '蔡文姬',   nameEn: 'cai_wen_ji',      heroId: 184, color: '#FFD700', radius: 52, score: 2560 },
-  { tier: 11, nameZh: '瑶',       nameEn: 'yao',             heroId: 505, color: '#FF69B4', radius: 55, score: 5120 },
+  { tier: 8,  nameZh: '虞姬',     nameEn: 'yu_ji',           heroId: 174, color: '#AFEEEE', radius: 49, score: 640 },
+  { tier: 9,  nameZh: '小乔',     nameEn: 'xiao_qiao',       heroId: 106, color: '#FFB6C1', radius: 56, score: 1280 },
+  { tier: 10, nameZh: '蔡文姬',   nameEn: 'cai_wen_ji',      heroId: 184, color: '#FFD700', radius: 64, score: 2560 },
+  { tier: 11, nameZh: '瑶',       nameEn: 'yao',             heroId: 505, color: '#FF69B4', radius: 72, score: 5120 },
 ];
 
 /** Special score for tier-11 + tier-11 merge. */
@@ -78,12 +78,12 @@ export const SPAWN_TABLE: SpawnEntry[] = [
 // Physics constants
 // ---------------------------------------------------------------------------
 
-export const GRAVITY = 0.8;          // Moderate — fruits have weight but don't slam
+export const GRAVITY = 1.2;          // Heavier weight
 export const CONTAINER_WIDTH = 360;
-export const CONTAINER_HEIGHT = 640;
-export const RESTITUTION = 0.22;     // Very soft bounce — gentle "thud" not "boing"
-export const FRICTION = 0.4;         // Moderate — fruits settle without sliding forever
-export const FRICTION_AIR = 0.04;    // Higher air resistance — key to "floaty" feel
+export const CONTAINER_HEIGHT = 520;
+export const RESTITUTION = 0.3;      // Firm bounce on impact
+export const FRICTION = 0.45;        // Moderate grip
+export const FRICTION_AIR = 0.03;    // Less floaty, more direct
 export const DEATH_LINE_Y = 35;
 export const GAME_OVER_DURATION_MS = 1000;
 export const MAX_VELOCITY = 15;

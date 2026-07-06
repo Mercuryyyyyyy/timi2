@@ -25,10 +25,10 @@ describe('constants', () => {
     }
   });
 
-  it('radii match formula: 25 + (tier-1)*30/10 rounded to nearest int', () => {
-    HERO_CHAIN.forEach(h => {
-      const expected = Math.round(25 + (h.tier - 1) * 30 / 10);
-      expect(h.radius).toBe(expected);
+  it('radii match expected values with dramatic size scaling', () => {
+    const expectedRadii = [24, 25, 27, 30, 33, 38, 43, 49, 56, 64, 72];
+    HERO_CHAIN.forEach((h, i) => {
+      expect(h.radius).toBe(expectedRadii[i]);
     });
   });
 
