@@ -38,24 +38,25 @@ export interface Particle {
 }
 
 // ---------------------------------------------------------------------------
-// Hero merge chain (tiers 1–10)
+// Hero merge chain (tiers 1–11)
 // ---------------------------------------------------------------------------
 
 export const HERO_CHAIN: HeroDefinition[] = [
   { tier: 1,  nameZh: '马可波罗', nameEn: 'marco_polo',      heroId: 132, color: '#4A90D9', radius: 20, score: 0 },
-  { tier: 2,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_ye', heroId: 182, color: '#7B68EE', radius: 23, score: 10 },
-  { tier: 3,  nameZh: '铠',       nameEn: 'kai',             heroId: 193, color: '#4169E1', radius: 26, score: 20 },
-  { tier: 4,  nameZh: '甄姬',     nameEn: 'zhen_ji',         heroId: 127, color: '#00CED1', radius: 28, score: 40 },
-  { tier: 5,  nameZh: '云缨',     nameEn: 'yun_ying',        heroId: 538, color: '#FF6347', radius: 31, score: 80 },
-  { tier: 6,  nameZh: '海诺',     nameEn: 'hai_nuo',         heroId: 563, color: '#9932CC', radius: 34, score: 160 },
-  { tier: 7,  nameZh: '虞姬',     nameEn: 'yu_ji',           heroId: 174, color: '#32CD32', radius: 37, score: 320 },
-  { tier: 8,  nameZh: '小乔',     nameEn: 'xiao_qiao',       heroId: 106, color: '#FF69B4', radius: 39, score: 640 },
-  { tier: 9,  nameZh: '蔡文姬',   nameEn: 'cai_wen_ji',      heroId: 184, color: '#FFD700', radius: 42, score: 1280 },
-  { tier: 10, nameZh: '瑶',       nameEn: 'yao',             heroId: 505, color: '#FF1493', radius: 45, score: 2560 },
+  { tier: 2,  nameZh: '不知火舞', nameEn: 'buzhihuowu',      heroId: 157, color: '#FF4500', radius: 23, score: 10 },
+  { tier: 3,  nameZh: '干将莫邪', nameEn: 'gan_jiang_mo_ye', heroId: 182, color: '#7B68EE', radius: 25, score: 20 },
+  { tier: 4,  nameZh: '铠',       nameEn: 'kai',             heroId: 193, color: '#4169E1', radius: 28, score: 40 },
+  { tier: 5,  nameZh: '甄姬',     nameEn: 'zhen_ji',         heroId: 127, color: '#00CED1', radius: 30, score: 80 },
+  { tier: 6,  nameZh: '云缨',     nameEn: 'yun_ying',        heroId: 538, color: '#FF6347', radius: 33, score: 160 },
+  { tier: 7,  nameZh: '海诺',     nameEn: 'hai_nuo',         heroId: 563, color: '#9932CC', radius: 35, score: 320 },
+  { tier: 8,  nameZh: '虞姬',     nameEn: 'yu_ji',           heroId: 174, color: '#32CD32', radius: 38, score: 640 },
+  { tier: 9,  nameZh: '小乔',     nameEn: 'xiao_qiao',       heroId: 106, color: '#FF69B4', radius: 40, score: 1280 },
+  { tier: 10, nameZh: '蔡文姬',   nameEn: 'cai_wen_ji',      heroId: 184, color: '#FFD700', radius: 43, score: 2560 },
+  { tier: 11, nameZh: '瑶',       nameEn: 'yao',             heroId: 505, color: '#FF1493', radius: 45, score: 5120 },
 ];
 
-/** Special score for tier-10 + tier-10 merge. */
-export const YAO_YAO_SCORE = 5000;
+/** Special score for tier-11 + tier-11 merge. */
+export const YAO_YAO_SCORE = 10000;
 
 /** Look up a hero definition by tier (1-indexed). */
 export function getHeroByTier(tier: number): HeroDefinition | undefined {

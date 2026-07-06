@@ -20,6 +20,7 @@ const audioCache = new Map<string, AudioBuffer>();
 function getAudioKey(nameEn: string): string {
   const overrides: Record<string, string> = {
     'marco_polo': 'makeboluo',
+    'buzhihuowu': 'buzhihuowu',
     'gan_jiang_mo_ye': 'ganjiangmoxie',
   };
   return overrides[nameEn] ?? nameEn.toLowerCase().replace(/_/g, '');

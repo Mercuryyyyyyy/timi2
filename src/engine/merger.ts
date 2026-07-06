@@ -79,7 +79,7 @@ export function processMerges(world: Matter.World, now: number): MergeResult[] {
         });
         scoreDelta = nextHero.score;
       } else {
-        // Both were tier 10 → YAO_YAO_SCORE
+        // Both were tier 11 → YAO_YAO_SCORE
         scoreDelta = YAO_YAO_SCORE;
       }
 

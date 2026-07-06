@@ -116,9 +116,9 @@ function gameLoop(timestamp: number): void {
         startPopAnimation(result.created.position.x, result.created.position.y, heroDef.radius, heroDef);
         playHeroVoice(heroDef.tier);
       }
-      if ((result.created as any).heroTier === 10) hasYao = true;
+      if ((result.created as any).heroTier === 11) hasYao = true;
     } else {
-      // Both tier-10 bodies removed: award YAO_YAO_SCORE (incremented above)
+      // Both tier-11 bodies removed: award YAO_YAO_SCORE (incremented above)
       // Also mark hasYao since the merge itself produced score for "yao+yao"
       hasYao = true;
     }

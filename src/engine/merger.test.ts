@@ -37,15 +37,15 @@ describe('merger', () => {
     expect(results[0].scoreDelta).toBeGreaterThan(0);
   });
 
-  it('awards YAO_YAO_SCORE when merging two tier-10 bodies', () => {
-    const a = createHeroBody(engine.world, { tier: 10, nameZh: '瑶', radius: 45, x: 180, y: 200 });
-    const b = createHeroBody(engine.world, { tier: 10, nameZh: '瑶', radius: 45, x: 200, y: 200 });
+  it('awards YAO_YAO_SCORE when merging two tier-11 bodies', () => {
+    const a = createHeroBody(engine.world, { tier: 11, nameZh: '瑶', radius: 45, x: 180, y: 200 });
+    const b = createHeroBody(engine.world, { tier: 11, nameZh: '瑶', radius: 45, x: 200, y: 200 });
     Body.setPosition(a, { x: 180, y: 200 });
     Body.setPosition(b, { x: 185, y: 200 });
     const results = processMerges(engine.world, Date.now());
     expect(results).toHaveLength(1);
     expect(results[0].created).toBeNull();
-    expect(results[0].scoreDelta).toBe(5000);
+    expect(results[0].scoreDelta).toBe(10000);
   });
 
   it('respects merge cooldown', () => {

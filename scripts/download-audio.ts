@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const HERO_NAMES = ['makeboluo', 'ganjiangmoxie', 'kai', 'zhenji', 'yunying', 'hainuo', 'yuji', 'xiaoqiao', 'caiwenji', 'yao'];
+const HERO_NAMES = ['makeboluo', 'buzhihuowu', 'ganjiangmoxie', 'kai', 'zhenji', 'yunying', 'hainuo', 'yuji', 'xiaoqiao', 'caiwenji', 'yao'];
 
 const AUDIO_DIR = path.resolve(__dirname, '..', 'public', 'audio');
 
@@ -44,8 +44,8 @@ function parseVoiceSelectionFile(): Map<string, string[]> {
 
   // Map hero display names to directory names (underscore-free, lowercase)
   const nameMap: Record<string, string> = {
-    '马可波罗': 'makeboluo', '干将莫邪': 'ganjiangmoxie', '铠': 'kai',
-    '甄姬': 'zhenji', '云缨': 'yunying', '海诺': 'hainuo',
+    '马可波罗': 'makeboluo', '不知火舞': 'buzhihuowu', '干将莫邪': 'ganjiangmoxie',
+    '铠': 'kai', '甄姬': 'zhenji', '云缨': 'yunying', '海诺': 'hainuo',
     '虞姬': 'yuji', '小乔': 'xiaoqiao', '蔡文姬': 'caiwenji', '瑶': 'yao',
   };
 

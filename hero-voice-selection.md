@@ -132,7 +132,54 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20231128/17011440866769.mp3
   ```
 
-## 干将莫邪（等级 2，ID=182）
+## 不知火舞（等级 2，ID=157）
+
+- [x] **#1** `[大厅语音1]` 放马过来！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220414/16499312319021.mp3
+  ```
+- [x] **#2** `[大厅语音2]` 安迪~
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220414/16499312521160.mp3
+  ```
+- [x] **#3** `[移动语音1]` 来啊，加油~！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497342098720.wav
+  ```
+- [x] **#4** `[移动语音2]` 龙炎舞！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497342319735.wav
+  ```
+- [x] **#5** `[移动语音3]` 风车崩！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497342528711.wav
+  ```
+- [x] **#6** `[移动语音4]` 梦樱！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497342713599.wav
+  ```
+- [x] **#7** `[技能语音1-1]` 花蝶扇！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497345502828.wav
+  ```
+- [x] **#8** `[技能语音3-1]` 忍蜂——！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497345695585.wav
+  ```
+- [x] **#9** `[击杀语音]` 不知火究極奥義！
+  
+  ```
+  https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497346872893.wav
+  ```
+## 干将莫邪（等级 3，ID=182）
 
 - [ ] **#1** `[大厅语音]` 一分为二的生命；独一无二的魂灵
   
@@ -270,7 +317,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220408/16494003567042.wav
   ```
 
-## 铠（等级 3，ID=193）
+## 铠（等级 4，ID=193）
 
 - [ ] **#1** `[大厅出现]` 比任何对手都强，乃人生最大的烦恼。
   
@@ -513,7 +560,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497714808360.wav
   ```
 
-## 甄姬（等级 4，ID=127）
+## 甄姬（等级 5，ID=127）
 
 - [ ] **#1** `[大厅语音1]` 真的，会有人选择阿宓吗？
   
@@ -581,7 +628,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220412/16497740556071.wav
   ```
 
-## 云缨（等级 5，ID=538）
+## 云缨（等级 6，ID=538）
 
 - [ ] **#1** `[大厅出现1]` 枪心如火，枪如我心！
   
@@ -1139,11 +1186,11 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20250715/17525712694155.mp3
   ```
 
-## 海诺（等级 6，ID=563）
+## 海诺（等级 7，ID=563）
 
 > **WARNING**: 该英雄API无语音数据，请自行提供音频文件。
 
-## 虞姬（等级 7，ID=174）
+## 虞姬（等级 8，ID=174）
 
 - [ ] **#1** `[大厅语音]` 明媚如风，轻盈似箭
   
@@ -1231,7 +1278,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20221109/16679865266752.mp3
   ```
 
-## 小乔（等级 8，ID=106）
+## 小乔（等级 9，ID=106）
 
 - [x] **#1** `[大厅语音1]` 恋爱和战斗，都要勇往直前！
   
@@ -1309,7 +1356,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20250630/17512669962264.mp3
   ```
 
-## 蔡文姬（等级 9，ID=184）
+## 蔡文姬（等级 10，ID=184）
 
 - [ ] **#1** `[大厅语音1]` 飞舞战场的美少女，大活跃Q~~
   
@@ -1442,7 +1489,7 @@
   https://game.gtimg.cn/images/yxzj/zlkdatasys/audios/audio/20220426/16509634335463.mp3
   ```
 
-## 瑶（等级 10，ID=505）
+## 瑶（等级 11，ID=505）
 
 - [ ] **#1** `[大厅语音]` 啊~过去生于未来~
   
