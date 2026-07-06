@@ -991,7 +991,7 @@ git commit -m "feat: canvas rendering for background, death line, hero bubbles w
 - Create: `src/rendering/hud.ts`
 - Create: `src/main.ts`
 
-- [ ] **Step 1: Create animations.ts (particle system + pop effects)**
+- [x] **Step 1: Create animations.ts (particle system + pop effects)**
 
 Write to `src/rendering/animations.ts`:
 
@@ -1072,7 +1072,7 @@ export function clearAnimations(): void {
 }
 ```
 
-- [ ] **Step 2: Create hud.ts (HUD overlay with score, next hero preview, mute button)**
+- [x] **Step 2: Create hud.ts (HUD overlay with score, next hero preview, mute button)**
 
 Write to `src/rendering/hud.ts`:
 
