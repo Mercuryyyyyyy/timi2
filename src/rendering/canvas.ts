@@ -3,7 +3,7 @@ import {
   HERO_CHAIN, CONTAINER_WIDTH, CONTAINER_HEIGHT, DEATH_LINE_Y, HUD_HEIGHT,
   COLOR_BACKGROUND, COLOR_CONTAINER_GRADIENT_TOP, COLOR_CONTAINER_GRADIENT_BOTTOM,
   COLOR_CONTAINER_BORDER, COLOR_HUD_BG, COLOR_ACCENT, COLOR_WHITE,
-  FONT_STACK, getFontSize, getHeroImagePath, type HeroDefinition, type Particle,
+  FONT_STACK, getFontSize, getHeroImagePath, type Particle,
 } from '../constants';
 import { getHeroBodies } from '../engine/physics';
 
@@ -15,16 +15,32 @@ const IMAGE_EXTENSIONS = ['.png', '.jpg'] as const;
 
 const imageCache = new Map<string, HTMLImageElement>();
 
-function tryLoadImage(path: string): HTMLImageElement | null {
-  const cached = imageCache.get(path);
-  if (cached) {
-    // Return only if successfully loaded
-    return (cached.complete && cached.naturalWidth > 0) ? cached : null;
+/** Preload all hero images. Returns a Promise that resolves when all are loaded (or failed). */
+export async function preloadHeroImages(): Promise<void> {
+  const promises: Promise<void>[] = [];
+  for (const hero of HERO_CHAIN) {
+    const basePath = getHeroImagePath(hero.tier, hero.nameEn);
+    for (const ext of IMAGE_EXTENSIONS) {
+      const fullPath = basePath + ext;
+      promises.push(new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => { imageCache.set(fullPath, img); resolve(); };
+        img.onerror = () => { resolve(); }; // Silently skip missing extensions
+        img.src = fullPath;
+      }));
+    }
   }
-  const img = new Image();
-  img.src = path;
-  imageCache.set(path, img);
-  // Don't return yet — image hasn't loaded
+  await Promise.all(promises);
+}
+
+/** Get a hero image from cache. Returns null if not loaded. */
+function getHeroImage(tier: number, nameEn: string): HTMLImageElement | null {
+  const basePath = getHeroImagePath(tier, nameEn);
+  for (const ext of IMAGE_EXTENSIONS) {
+    const fullPath = basePath + ext;
+    const img = imageCache.get(fullPath);
+    if (img && img.complete && img.naturalWidth > 0) return img;
+  }
   return null;
 }
 
@@ -98,18 +114,7 @@ export function renderHeroBodies(
     if (!heroDef) continue;
 
     const r = heroDef.radius;
-    const imagePath = getHeroImagePath(tier, heroDef.nameEn);
-
-    // Try to load/use hero image — only use if loaded successfully
-    let img: HTMLImageElement | null = null;
-    for (const ext of IMAGE_EXTENSIONS) {
-      const fullPath = imagePath + ext;
-      const loaded = tryLoadImage(fullPath);
-      if (loaded && loaded.complete && loaded.naturalWidth > 0) {
-        img = loaded;
-        break;
-      }
-    }
+    const img = getHeroImage(tier, heroDef.nameEn);
 
     // Draw circle fill
     ctx.save();
@@ -217,15 +222,7 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
     const previewY = barH / 2;
     const previewR = 16;
 
-    const imagePath = getHeroImagePath(nextHero.tier, nextHero.nameEn);
-    let img: HTMLImageElement | null = null;
-    for (const ext of IMAGE_EXTENSIONS) {
-      const loaded = tryLoadImage(imagePath + ext);
-      if (loaded && loaded.complete && loaded.naturalWidth > 0) {
-        img = loaded;
-        break;
-      }
-    }
+    const img = getHeroImage(nextHero.tier, nextHero.nameEn);
 
     // Draw fill
     ctx.save();

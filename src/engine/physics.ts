@@ -6,6 +6,35 @@ const { Engine, World, Bodies, Body } = Matter;
 export const HERO_CATEGORY = 0x0001;
 export const WALL_CATEGORY = 0x0002;
 
+// Pending merge pairs collected from collision events: [bodyA, bodyB]
+const pendingMerges: Array<[Matter.Body, Matter.Body]> = [];
+
+export function setupMergeListener(engine: Matter.Engine): void {
+  Matter.Events.on(engine, 'collisionStart', (event) => {
+    for (const pair of event.pairs) {
+      const tierA = (pair.bodyA as any).heroTier;
+      const tierB = (pair.bodyB as any).heroTier;
+      if (tierA == null || tierB == null) continue; // not hero bodies
+      if (tierA !== tierB) continue; // different tiers
+
+      const now = performance.now();
+      const cdA = (pair.bodyA as any).mergeCooldownUntil || 0;
+      const cdB = (pair.bodyB as any).mergeCooldownUntil || 0;
+      if (cdA > now || cdB > now) continue; // on cooldown
+
+      pendingMerges.push([pair.bodyA, pair.bodyB]);
+    }
+  });
+}
+
+export function getPendingMerges(): Array<[Matter.Body, Matter.Body]> {
+  return pendingMerges;
+}
+
+export function clearPendingMerges(): void {
+  pendingMerges.length = 0;
+}
+
 export function createPhysicsEngine(): Matter.Engine {
   const engine = Engine.create({
     gravity: { x: 0, y: GRAVITY, scale: 0.001 },
@@ -22,6 +51,7 @@ export function createPhysicsEngine(): Matter.Engine {
   const floor = Bodies.rectangle(CONTAINER_WIDTH / 2, CONTAINER_HEIGHT + 5, CONTAINER_WIDTH + 20, 10, wallOpts);
 
   World.add(engine.world, [leftWall, rightWall, floor]);
+  setupMergeListener(engine);
   return engine;
 }
 

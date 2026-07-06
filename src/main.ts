@@ -7,7 +7,7 @@ import { createPhysicsEngine, createHeroBody, clampBodyVelocity, getHeroBodies }
 import { processMerges } from './engine/merger';
 import {
   renderBackground, renderContainer, renderHeroBodies, renderParticles, renderHUD,
-  getContainerOffsetX, getContainerOffsetY, isInsideContainer,
+  getContainerOffsetX, getContainerOffsetY, isInsideContainer, preloadHeroImages,
 } from './rendering/canvas';
 import {
   spawnParticles, startPopAnimation, updateAnimations, drawPopAnimations, clearAnimations,
@@ -86,6 +86,7 @@ async function startGame(): Promise<void> {
   try { muted = readMuted(); } catch { muted = false; }
 
   engine = createPhysicsEngine();
+  preloadHeroImages();
 
   await initAudio();
   resumeAudio();

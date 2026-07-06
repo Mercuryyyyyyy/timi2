@@ -1,8 +1,8 @@
 import Matter from 'matter-js';
 import { HERO_CHAIN, YAO_YAO_SCORE, MERGE_COOLDOWN_MS } from '../constants';
-import { getHeroBodies, createHeroBody, removeBody, type HeroBodyOptions } from './physics';
+import { createHeroBody, removeBody, getPendingMerges, clearPendingMerges } from './physics';
 
-const { Body, World } = Matter;
+const { Body } = Matter;
 
 export interface MergeResult {
   removed: Matter.Body[];
@@ -11,84 +11,54 @@ export interface MergeResult {
 }
 
 /**
- * Process all pending same-tier collisions and produce merge results.
+ * Process collision-detected merge pairs and produce merge results.
  * After removing old bodies, creates the combined hero (or awards YAO_YAO_SCORE).
  */
 export function processMerges(world: Matter.World, now: number): MergeResult[] {
   const results: MergeResult[] = [];
-  const bodies = getHeroBodies(world);
+  const pairs = [...getPendingMerges()];
+  clearPendingMerges();
+
   const processed = new Set<number>();
 
-  for (let i = 0; i < bodies.length; i++) {
-    if (processed.has(bodies[i].id)) continue;
-    const tierI = (bodies[i] as any).heroTier;
-    const cooldownI = (bodies[i] as any).mergeCooldownUntil || 0;
-    if (cooldownI > now) continue;
+  for (const [bodyA, bodyB] of pairs) {
+    // Skip if either body was already merged in this batch (e.g. 3+ simultaneous collisions)
+    if (processed.has(bodyA.id) || processed.has(bodyB.id)) continue;
+    processed.add(bodyA.id);
+    processed.add(bodyB.id);
 
-    for (let j = i + 1; j < bodies.length; j++) {
-      if (processed.has(bodies[j].id)) continue;
-      const tierJ = (bodies[j] as any).heroTier;
-      if (tierI !== tierJ) continue;
-      const cooldownJ = (bodies[j] as any).mergeCooldownUntil || 0;
-      if (cooldownJ > now) continue;
+    const tierI = (bodyA as any).heroTier;
+    const nextTier = tierI + 1;
+    const nextHero = HERO_CHAIN.find(h => h.tier === nextTier);
 
-      // Check collision
-      const dist = Matter.Vector.magnitude(
-        Matter.Vector.sub(bodies[i].position, bodies[j].position)
-      );
-      const rI = (bodies[i] as any).heroRadius || 20;
-      const rJ = (bodies[j] as any).heroRadius || 20;
-      const minDist = (rI + rJ) * 0.9; // Merge when 10% overlapping
+    // Set cooldown
+    (bodyA as any).mergeCooldownUntil = now + MERGE_COOLDOWN_MS;
+    (bodyB as any).mergeCooldownUntil = now + MERGE_COOLDOWN_MS;
 
-      if (dist > minDist) continue;
+    const centerX = (bodyA.position.x + bodyB.position.x) / 2;
+    const centerY = (bodyA.position.y + bodyB.position.y) / 2;
 
-      // Debug (remove after testing):
-      // console.log(`tier=${tierI} dist=${dist.toFixed(1)} minDist=${minDist.toFixed(1)} merged=${dist <= minDist}`);
+    removeBody(world, bodyA);
+    removeBody(world, bodyB);
 
-      // Both bodies are on cooldown from this merge
-      (bodies[i] as any).mergeCooldownUntil = now + MERGE_COOLDOWN_MS;
-      (bodies[j] as any).mergeCooldownUntil = now + MERGE_COOLDOWN_MS;
+    let created: Matter.Body | null = null;
+    let scoreDelta = 0;
 
-      const nextTier = tierI + 1;
-      const nextHero = HERO_CHAIN.find(h => h.tier === nextTier);
-
-      // Calculate merge center
-      const centerX = (bodies[i].position.x + bodies[j].position.x) / 2;
-      const centerY = (bodies[i].position.y + bodies[j].position.y) / 2;
-
-      processed.add(bodies[i].id);
-      processed.add(bodies[j].id);
-
-      removeBody(world, bodies[i]);
-      removeBody(world, bodies[j]);
-
-      let created: Matter.Body | null = null;
-      let scoreDelta = 0;
-
-      if (nextHero) {
-        // Create merged hero
-        const opts: HeroBodyOptions = {
-          tier: nextHero.tier,
-          nameZh: nextHero.nameZh,
-          radius: nextHero.radius,
-          x: centerX,
-          y: centerY,
-        };
-        created = createHeroBody(world, opts);
-        // Apply small upward velocity for visual feedback
-        Body.setVelocity(created, {
-          x: 0,
-          y: Math.max(-2, (created as any).velocity?.y || 0) - 1,
-        });
-        scoreDelta = nextHero.score;
-      } else {
-        // Both were tier 11 → YAO_YAO_SCORE
-        scoreDelta = YAO_YAO_SCORE;
-      }
-
-      results.push({ removed: [bodies[i], bodies[j]], created, scoreDelta });
-      break;
+    if (nextHero) {
+      created = createHeroBody(world, {
+        tier: nextHero.tier,
+        nameZh: nextHero.nameZh,
+        radius: nextHero.radius,
+        x: centerX,
+        y: centerY,
+      });
+      Body.setVelocity(created, { x: 0, y: -2 });
+      scoreDelta = nextHero.score;
+    } else {
+      scoreDelta = YAO_YAO_SCORE;
     }
+
+    results.push({ removed: [bodyA, bodyB], created, scoreDelta });
   }
 
   return results;
