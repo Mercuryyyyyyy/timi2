@@ -16,11 +16,16 @@ const IMAGE_EXTENSIONS = ['.png', '.jpg'] as const;
 const imageCache = new Map<string, HTMLImageElement>();
 
 function tryLoadImage(path: string): HTMLImageElement | null {
-  if (imageCache.has(path)) return imageCache.get(path)!;
+  const cached = imageCache.get(path);
+  if (cached) {
+    // Return only if successfully loaded
+    return (cached.complete && cached.naturalWidth > 0) ? cached : null;
+  }
   const img = new Image();
   img.src = path;
-  imageCache.set(path, img); // Cache immediately so we don't create new Image() each frame
-  return img; // Return the img element — it might still be loading, caller checks .complete
+  imageCache.set(path, img);
+  // Don't return yet — image hasn't loaded
+  return null;
 }
 
 // ---------------------------------------------------------------------------

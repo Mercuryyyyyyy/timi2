@@ -38,9 +38,12 @@ export function processMerges(world: Matter.World, now: number): MergeResult[] {
       );
       const rI = (bodies[i] as any).heroRadius || 20;
       const rJ = (bodies[j] as any).heroRadius || 20;
-      const minDist = rI + rJ - 2; // slight overlap tolerance for merge
+      const minDist = (rI + rJ) * 0.9; // Merge when 10% overlapping
 
       if (dist > minDist) continue;
+
+      // Debug (remove after testing):
+      // console.log(`tier=${tierI} dist=${dist.toFixed(1)} minDist=${minDist.toFixed(1)} merged=${dist <= minDist}`);
 
       // Both bodies are on cooldown from this merge
       (bodies[i] as any).mergeCooldownUntil = now + MERGE_COOLDOWN_MS;
