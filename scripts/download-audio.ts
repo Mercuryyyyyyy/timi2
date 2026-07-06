@@ -57,7 +57,7 @@ function parseVoiceSelectionFile(): Map<string, string[]> {
 
     // Detect hero section header (## 马可波罗, etc.)
     for (const [zhName, dirName] of Object.entries(nameMap)) {
-      if (line.includes(zhName) && line.startsWith('## ')) {
+      if (line.includes(zhName) && line.trim().startsWith('## ')) {
         currentHero = dirName;
         break;
       }
