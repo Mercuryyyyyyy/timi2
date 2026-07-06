@@ -371,6 +371,18 @@ window.addEventListener('mouseup', () => {
   }
 });
 
+// Debug: press Y to trigger 瑶 merge effect directly
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'y' && scene === 'playing' && engine) {
+    const cx = CONTAINER_WIDTH / 2;
+    const cy = CONTAINER_HEIGHT / 2;
+    triggerButterflyBloom(cx, cy);
+    playYaoSpecial();
+    hasYao = true;
+    score += 10000;
+  }
+});
+
 window.addEventListener('resize', resizeCanvas);
 
 ctx = canvas.getContext('2d');
