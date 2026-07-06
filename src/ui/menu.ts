@@ -1,4 +1,4 @@
-import { CONTAINER_WIDTH, FONT_STACK, COLOR_ACCENT, COLOR_WHITE } from '../constants';
+import { CONTAINER_WIDTH, CONTAINER_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, HERO_CHAIN } from '../constants';
 
 export function drawMenu(ctx: CanvasRenderingContext2D): void {
   const cx = CONTAINER_WIDTH / 2;
@@ -9,7 +9,7 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.fillStyle = COLOR_ACCENT;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('合成大timi', cx, 160);
+  ctx.fillText('合成大timi', cx, 120);
   ctx.restore();
 
   // Subtitle
@@ -17,23 +17,21 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.font = `14px ${FONT_STACK}`;
   ctx.fillStyle = '#999';
   ctx.textAlign = 'center';
-  ctx.fillText('王者荣耀英雄合成游戏', cx, 200);
+  ctx.fillText('王者荣耀英雄合成游戏', cx, 155);
   ctx.restore();
 
   // Start button
   const btnW = 160;
   const btnH = 50;
   const btnX = cx - btnW / 2;
-  const btnY = 280;
+  const btnY = 200;
 
   ctx.save();
-  // Button shadow
   ctx.fillStyle = 'rgba(233, 30, 99, 0.3)';
   ctx.beginPath();
   roundRect(ctx, btnX + 2, btnY + 2, btnW, btnH, 25);
   ctx.fill();
 
-  // Button body
   const grad = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
   grad.addColorStop(0, '#f48fb1');
   grad.addColorStop(1, COLOR_ACCENT);
@@ -42,7 +40,6 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   roundRect(ctx, btnX, btnY, btnW, btnH, 25);
   ctx.fill();
 
-  // Button text
   ctx.font = `bold 20px ${FONT_STACK}`;
   ctx.fillStyle = COLOR_WHITE;
   ctx.textAlign = 'center';
@@ -50,12 +47,40 @@ export function drawMenu(ctx: CanvasRenderingContext2D): void {
   ctx.fillText('开始游戏', cx, btnY + btnH / 2);
   ctx.restore();
 
-  // Hint text
+  // Merge chain rule
+  let ruleY = 275;
   ctx.save();
-  ctx.font = `11px ${FONT_STACK}`;
-  ctx.fillStyle = '#ccc';
+  ctx.font = `bold 11px ${FONT_STACK}`;
+  ctx.fillStyle = '#666';
   ctx.textAlign = 'center';
-  ctx.fillText('合成所有英雄，最终合成瑶！', cx, 360);
+  ctx.fillText('合成规则：相同英雄碰撞 → 合成下一级', cx, ruleY);
+  ctx.restore();
+
+  ruleY += 18;
+  // Compact chain: "马可→火舞→干将→铠→甄姬→云缨→海诺→虞姬→小乔→文姬→瑶"
+  const chainNames = HERO_CHAIN.map(h => h.nameZh).join(' → ');
+  ctx.save();
+  ctx.font = `10px ${FONT_STACK}`;
+  ctx.fillStyle = '#999';
+  ctx.textAlign = 'center';
+  ctx.fillText(chainNames, cx, ruleY);
+  ctx.restore();
+
+  ruleY += 18;
+  ctx.save();
+  ctx.font = `bold 10px ${FONT_STACK}`;
+  ctx.fillStyle = '#e91e63';
+  ctx.textAlign = 'center';
+  ctx.fillText('🌟 瑶 + 瑶 = 10000分 + 蝴蝶特效 + 掉落3个小英雄清场', cx, ruleY);
+  ctx.restore();
+
+  // Operation hint
+  ruleY += 22;
+  ctx.save();
+  ctx.font = `10px ${FONT_STACK}`;
+  ctx.fillStyle = '#bbb';
+  ctx.textAlign = 'center';
+  ctx.fillText('长按移动定位 · 松手掉落', cx, ruleY);
   ctx.restore();
 }
 
