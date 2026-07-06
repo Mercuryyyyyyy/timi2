@@ -345,12 +345,12 @@ export function clearButterflies(): void {
 // HUD button layout constants
 // ---------------------------------------------------------------------------
 
-const HUD_BUTTON_RADIUS = 14;
-const BUTTON_START_X = CONTAINER_WIDTH - 4 * (HUD_BUTTON_RADIUS * 2 + 4);
-const BUTTON_PAUSE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 2;
-const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_RADIUS * 2 + 4;
-const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_RADIUS * 2 + 4;
-const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_RADIUS * 2 + 4;
+const HUD_BUTTON_RADIUS = 18;
+const BUTTON_START_X = CONTAINER_WIDTH - 4 * (HUD_BUTTON_RADIUS * 2 + 6);
+const BUTTON_PAUSE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 3;
+const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_RADIUS * 2 + 6;
+const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_RADIUS * 2 + 6;
+const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_RADIUS * 2 + 6;
 
 function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string): void {
   ctx.save();
