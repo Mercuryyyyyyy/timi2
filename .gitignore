@@ -6,6 +6,7 @@ dist/
 *.local
 public/audio/*
 !public/audio/.gitkeep
+!public/audio/voices.json
 public/heroes/*
 !public/heroes/.gitkeep
 *.Zone.Identifier
