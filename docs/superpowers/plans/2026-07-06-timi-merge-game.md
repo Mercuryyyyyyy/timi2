@@ -1765,7 +1765,7 @@ git commit -m "feat: game-over panel with score, new record badge, leaderboard t
 **Files:**
 - Create: `scripts/download-audio.ts`
 
-- [ ] **Step 1: Create download-audio.ts script**
+ - [x] **Step 1: Create download-audio.ts script**
 
 Write to `scripts/download-audio.ts`:
 
@@ -1871,7 +1871,7 @@ async function main(): Promise<void> {
 main().catch((err) => { console.error('Fatal error:', err); process.exit(1); });
 ```
 
-- [ ] **Step 2: Run the download script (dry-run first)**
+ - [x] **Step 2: Run the download script (dry-run first)**
 
 Run:
 ```
@@ -1918,7 +1918,7 @@ git commit -m "feat: audio download script with dry-run, idempotent download, an
 **Files:**
 - Create: `src/audio/audio.ts`
 
-- [ ] **Step 1: Create audio.ts**
+ - [x] **Step 1: Create audio.ts**
 
 Write to `src/audio/audio.ts`:
 
@@ -2062,7 +2062,7 @@ export function isAudioReady(): boolean {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compilation**
+ - [x] **Step 2: Verify TypeScript compilation**
 
 Run:
 ```
