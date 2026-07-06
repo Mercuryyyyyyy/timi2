@@ -4,5 +4,8 @@ node_modules/
 dist/
 .DS_Store
 *.local
-public/audio/    # Don't commit downloaded audio files
+public/audio/*
 !public/audio/.gitkeep
+public/heroes/*
+!public/heroes/.gitkeep
+*.Zone.Identifier
