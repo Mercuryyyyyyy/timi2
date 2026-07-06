@@ -93,6 +93,6 @@ export function isStartButtonClicked(x: number, y: number): boolean {
   const btnW = 160;
   const btnH = 50;
   const btnX = cx - btnW / 2;
-  const btnY = 280;
+  const btnY = 200;  // must match drawMenu's btnY
   return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
 }
