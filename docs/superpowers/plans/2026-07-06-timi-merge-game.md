@@ -582,7 +582,7 @@ git commit -m "feat: Matter.js physics engine with walls, hero body factory, and
 - Create: `src/engine/spawner.ts`
 - Create: `src/engine/spawner.test.ts`
 
-- [ ] **Step 1: Create spawner.ts**
+- [x] **Step 1: Create spawner.ts**
 
 Write to `src/engine/spawner.ts`:
 
@@ -611,7 +611,7 @@ export function getSpawnY(): number {
 }
 ```
 
-- [ ] **Step 2: Create spawner.test.ts**
+- [x] **Step 2: Create spawner.test.ts**
 
 Write to `src/engine/spawner.test.ts`:
 
