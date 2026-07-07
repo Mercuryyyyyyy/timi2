@@ -103,7 +103,7 @@ export function drawGameOver(
   ctx.textBaseline = 'top';
   ctx.shadowColor = 'rgba(233,30,99,0.12)';
   ctx.shadowBlur = 4;
-  ctx.fillText(score.toLocaleString('zh-CN'), CX, y + 30);
+  ctx.fillText(score.toLocaleString('zh-CN'), CX, y + 32);  // centered: 4px gap above & below
   ctx.restore();
 
   // "分" after score
