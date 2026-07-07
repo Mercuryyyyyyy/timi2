@@ -51,6 +51,10 @@ let shakeStart = 0;
 let lastShakeTime = 0;
 const SHAKE_COOLDOWN_MS = 400;
 
+// Game-over grace period after manual shake (ms)
+let shakeGraceUntil = 0;
+const SHAKE_GRACE_MS = 800;
+
 // Drag-to-position preview state
 let readyHero: HeroDefinition | null = null;
 let dragX: number | null = null;
@@ -115,6 +119,7 @@ async function startGame(): Promise<void> {
   dragX = null;
   setDropPreview(null);
   deathTimers.clear();
+  shakeGraceUntil = 0;
   clearAnimations();
   clearButterflies();
   clearScorePops();
@@ -157,18 +162,18 @@ function doShake(): void {
   if (now - lastShakeTime < SHAKE_COOLDOWN_MS) return;
   lastShakeTime = now;
 
+  // Suppress game-over detection during shake settle
+  shakeGraceUntil = now + SHAKE_GRACE_MS;
+
   const bodies = getHeroBodies(engine.world);
   for (const body of bodies) {
     if (body.isStatic) continue;
     const impulse = {
       x: (Math.random() - 0.5) * 0.4,
-      y: -(0.6 + Math.random() * 1.0),
+      y: -(0.3 + Math.random() * 0.5),
     };
     Matter.Body.applyForce(body, body.position, impulse);
   }
-
-  // Reset death timers so the shake bump doesn't trigger game over
-  deathTimers.clear();
 }
 
 function gameLoop(timestamp: number): void {
@@ -328,6 +333,8 @@ function renderFrame(delta: number): void {
 
 function checkGameOver(deltaMs: number): boolean {
   if (!engine) return false;
+  // Skip game-over checks during the shake grace period
+  if (performance.now() < shakeGraceUntil) return false;
   const heroBodies = getHeroBodies(engine.world);
   for (const body of heroBodies) {
     const radius: number = (body as any).heroRadius ?? 0;
