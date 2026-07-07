@@ -19,7 +19,7 @@ import {
   getParticles,
 } from './rendering/animations';
 import { consumeNextHero } from './rendering/hud';
-import { initAudio, ensureAudioContext, resumeAudio, playHeroVoice, preloadHeroAudio, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
+import { initAudio, ensureAudioContext, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
 import { drawGameOver, isReplayClicked, isHomeClicked } from './ui/gameover';
@@ -133,10 +133,8 @@ async function startGame(): Promise<void> {
   // Preload hero images (blocks until all loaded)
   await preloadHeroImages();
 
-  // Preload audio for common tiers 1-4 synchronously (80%+ of spawns)
-  for (let t = 1; t <= 4; t++) await preloadHeroAudio(t);
-  // Higher tiers load in background
-  preloadAllAudio();
+  // Preload ALL audio files before game starts (no lazy loading)
+  await preloadAllAudio();
 
   // Initialize first hero preview
   readyHero = consumeNextHero();
