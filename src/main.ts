@@ -19,7 +19,7 @@ import {
   getParticles,
 } from './rendering/animations';
 import { consumeNextHero } from './rendering/hud';
-import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
+import { initAudio, ensureAudioContext, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
 import { drawGameOver, isReplayClicked, isHomeClicked } from './ui/gameover';
@@ -419,7 +419,8 @@ function getCanvasCoords(e: MouseEvent | Touch): { x: number; y: number } {
 
 function onPointerDown(e: MouseEvent | TouchEvent): void {
   e.preventDefault();
-  resumeAudio(); // keep AudioContext alive
+  ensureAudioContext();   // must be synchronous inside user gesture for mobile
+  resumeAudio();
   const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
 
   if (scene === 'menu') {

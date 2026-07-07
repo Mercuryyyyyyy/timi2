@@ -17,8 +17,6 @@ const audioCache = new Map<string, AudioBuffer>();
 
 /**
  * Map nameEn values to the directory keys used by the download script.
- * Most heroes derive their key via nameEn.toLowerCase().replace(/_/g, ''),
- * but a few use non-pinyin directory names.
  */
 function getAudioKey(nameEn: string): string {
   const overrides: Record<string, string> = {
@@ -29,14 +27,27 @@ function getAudioKey(nameEn: string): string {
   return overrides[nameEn] ?? nameEn.toLowerCase().replace(/_/g, '');
 }
 
-export async function initAudio(): Promise<void> {
+/**
+ * Create / resume the AudioContext. MUST be called synchronously inside a
+ * user-gesture handler (click / touchstart), otherwise mobile browsers
+ * will refuse to start audio.
+ */
+export function ensureAudioContext(): void {
   if (!audioContext) {
     try {
       audioContext = new AudioContext();
     } catch {
       console.warn('Web Audio API not available');
+      return;
     }
   }
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+}
+
+export async function initAudio(): Promise<void> {
+  ensureAudioContext();
 
   // Load voice manifest (await so preloads don't race)
   try {

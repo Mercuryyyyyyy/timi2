@@ -16,27 +16,40 @@ const BASE = import.meta.env.BASE_URL || '/';
 
 const heroImageCache = new Map<number, HTMLImageElement>();
 
-/** Preload all hero images (tries .jpg then .png). Call once during startGame. */
-export function preloadHeroImages(): Promise<void[]> {
-  return Promise.all(
-    HERO_CHAIN.map((hero) => {
-      return new Promise<void>((resolve) => {
-        const basePath = getHeroImagePath(hero.tier, hero.nameEn);
-        for (const ext of ['.jpg', '.png']) {
-          const key = BASE + basePath + ext;
-          const img = new Image();
-          img.onload = () => {
-            heroImageCache.set(hero.tier, img);
-            resolve();
-          };
-          img.onerror = () => {}; // try next extension
-          img.src = key;
-        }
-        // Fallback after 3s if neither loaded
-        setTimeout(resolve, 3000);
-      });
-    }),
+/** Preload all hero images (sequential, .jpg → .png fallback). Call once during startGame. */
+export function preloadHeroImages(): Promise<void> {
+  return HERO_CHAIN.reduce(
+    (chain, hero) => chain.then(() => loadHeroImage(hero.tier, hero.nameEn)),
+    Promise.resolve(),
   );
+}
+
+function loadHeroImage(tier: number, nameEn: string): Promise<void> {
+  const basePath = getHeroImagePath(tier, nameEn);
+  const exts = tier === 1 ? ['.png', '.jpg'] : ['.jpg', '.png']; // tier-1 is .png
+  return tryLoad(basePath, exts, tier);
+}
+
+function tryLoad(basePath: string, exts: string[], tier: number, idx = 0): Promise<void> {
+  if (idx >= exts.length) return Promise.resolve(); // failed all
+  const url = BASE + basePath + exts[idx];
+  return new Promise<void>((resolve) => {
+    const img = new Image();
+    const timeout = setTimeout(() => {
+      img.src = '';
+      tryLoad(basePath, exts, tier, idx + 1).then(resolve);
+    }, 5000);
+    img.onload = () => {
+      clearTimeout(timeout);
+      heroImageCache.set(tier, img);
+      resolve();
+    };
+    img.onerror = () => {
+      clearTimeout(timeout);
+      tryLoad(basePath, exts, tier, idx + 1).then(resolve);
+    };
+    img.src = url;
+  });
 }
 
 function getHeroImg(tier: number): HTMLImageElement | null {
