@@ -161,11 +161,14 @@ function doShake(): void {
   for (const body of bodies) {
     if (body.isStatic) continue;
     const impulse = {
-      x: (Math.random() - 0.5) * 0.8,
-      y: -(1.5 + Math.random() * 2.0),
+      x: (Math.random() - 0.5) * 0.4,
+      y: -(0.6 + Math.random() * 1.0),
     };
     Matter.Body.applyForce(body, body.position, impulse);
   }
+
+  // Reset death timers so the shake bump doesn't trigger game over
+  deathTimers.clear();
 }
 
 function gameLoop(timestamp: number): void {
