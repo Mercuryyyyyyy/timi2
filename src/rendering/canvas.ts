@@ -347,12 +347,11 @@ export function clearButterflies(): void {
 
 const HUD_BUTTON_RADIUS = 18;
 const HUD_BUTTON_SLOT = HUD_BUTTON_RADIUS * 2 + 6; // diameter + gap
-const BUTTON_START_X = CONTAINER_WIDTH - 5 * HUD_BUTTON_SLOT;
+const BUTTON_START_X = CONTAINER_WIDTH - 4 * HUD_BUTTON_SLOT;
 const BUTTON_SHAKE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 3;
 const BUTTON_PAUSE_CX = BUTTON_SHAKE_CX + HUD_BUTTON_SLOT;
 const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_SLOT;
-const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_SLOT;
-const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_SLOT;
+const BUTTON_MUTE_CX = BUTTON_RESTART_CX + HUD_BUTTON_SLOT;
 
 function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string, disabled = false): void {
   ctx.save();
@@ -404,7 +403,7 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.fillText(`🏆 ${data.score}`, 12, cy);
   ctx.restore();
 
-  // Render HUD buttons (shake, pause, restart, settings, mute)
+  // Render HUD buttons (shake, pause, restart, mute)
   drawHUDButton(ctx, BUTTON_SHAKE_CX, cy, '💥', data.shakeRemaining <= 0);
   // Shake remaining count badge
   if (data.shakeRemaining > 0) {
@@ -418,7 +417,6 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   }
   drawHUDButton(ctx, BUTTON_PAUSE_CX, cy, data.isPaused ? '▶' : '⏸');
   drawHUDButton(ctx, BUTTON_RESTART_CX, cy, '🔄');
-  drawHUDButton(ctx, BUTTON_SETTINGS_CX, cy, '⚙');
   drawHUDButton(ctx, BUTTON_MUTE_CX, cy, data.isMuted ? '🔇' : '🔊');
 }
 
@@ -440,10 +438,6 @@ export function isPauseClicked(x: number, y: number): boolean {
 
 export function isRestartClicked(x: number, y: number): boolean {
   return isInsideButton(x, y, BUTTON_RESTART_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
-}
-
-export function isSettingsClicked(x: number, y: number): boolean {
-  return isInsideButton(x, y, BUTTON_SETTINGS_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
 }
 
 export function isMuteClicked(x: number, y: number): boolean {

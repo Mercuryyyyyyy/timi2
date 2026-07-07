@@ -11,7 +11,7 @@ import {
   setDropPreview, renderDropPreview,
   triggerButterflyBloom, updateAndDrawButterflies, clearButterflies,
   renderPauseOverlay,
-  isPauseClicked, isRestartClicked, isSettingsClicked, isMuteClicked, isShakeClicked,
+  isPauseClicked, isRestartClicked, isMuteClicked, isShakeClicked,
   spawnScorePop, updateAndDrawScorePops, clearScorePops,
 } from './rendering/canvas';
 import {
@@ -22,7 +22,6 @@ import { consumeNextHero } from './rendering/hud';
 import { initAudio, resumeAudio, playHeroVoice, preloadAllAudio, setMuted, playBGM, stopBGM, playZhenjiBGM, playYaoSpecial } from './audio/audio';
 import { readHighScore, writeHighScore, readMuted, writeMuted, insertLeaderboardEntry } from './leaderboard/storage';
 import { drawMenu, isStartButtonClicked } from './ui/menu';
-import { drawSettings, isSoundToggleClicked } from './ui/settings';
 import { drawGameOver, isReplayClicked, isHomeClicked } from './ui/gameover';
 
 // ---------------------------------------------------------------------------
@@ -35,8 +34,6 @@ let highScore = 0;
 let muted = false;
 let hasYao = false;
 let isPaused = false;
-let showSettings = false;
-let pausedBySettings = false;
 let highestTier = 1;
 let mergeCount = 0;
 let lastTime = 0;
@@ -112,8 +109,6 @@ async function startGame(): Promise<void> {
   score = 0;
   hasYao = false;
   isPaused = false;
-  showSettings = false;
-  pausedBySettings = false;
   highestTier = 1;
   mergeCount = 0;
   isDragging = false;
@@ -149,12 +144,7 @@ async function startGame(): Promise<void> {
 function togglePause(): void {
   if (scene !== 'playing' || !engine) return;
   isPaused = !isPaused;
-  if (isPaused) {
-    cancelAnimationFrame(rafId);
-  } else {
-    lastTime = performance.now();
-    rafId = requestAnimationFrame(gameLoop);
-  }
+  lastTime = performance.now();
 }
 
 /** Shake all hero bodies with a gentle upward bump. */
@@ -180,7 +170,7 @@ function doShake(): void {
 }
 
 function gameLoop(timestamp: number): void {
-  if (scene !== 'playing' || isPaused) return;
+  if (scene !== 'playing') return;
   const delta = Math.min(timestamp - lastTime, MAX_DELTA_MS);
   lastTime = timestamp;
 
@@ -189,14 +179,15 @@ function gameLoop(timestamp: number): void {
     return;
   }
 
-  // Step physics (delta is capped at MAX_DELTA_MS to prevent spiral-of-death)
-  Matter.Engine.update(engine, delta);
-  for (const body of Matter.Composite.allBodies(engine.world)) {
-    clampBodyVelocity(body);
-    // Kill micro-creep: if body is nearly at rest, stop it
-    if (Math.abs(body.velocity.x) < 0.1) Matter.Body.setVelocity(body, { x: 0, y: body.velocity.y });
-    if (Math.abs(body.velocity.y) < 0.1) Matter.Body.setVelocity(body, { x: body.velocity.x, y: 0 });
-  }
+  if (!isPaused) {
+    // Step physics (delta is capped at MAX_DELTA_MS to prevent spiral-of-death)
+    Matter.Engine.update(engine, delta);
+    for (const body of Matter.Composite.allBodies(engine.world)) {
+      clampBodyVelocity(body);
+      // Kill micro-creep: if body is nearly at rest, stop it
+      if (Math.abs(body.velocity.x) < 0.1) Matter.Body.setVelocity(body, { x: 0, y: body.velocity.y });
+      if (Math.abs(body.velocity.y) < 0.1) Matter.Body.setVelocity(body, { x: body.velocity.x, y: 0 });
+    }
 
   // Process merges
   const mergeResults = processMerges(engine.world, performance.now());
@@ -266,8 +257,9 @@ function gameLoop(timestamp: number): void {
     (body as any)._displayX += (body.position.x - (body as any)._displayX) * 0.35;
     (body as any)._displayY += (body.position.y - (body as any)._displayY) * 0.35;
   }
+  }  // end if (!isPaused)
 
-  // Render
+  // Render (always runs, even when paused)
   renderFrame(delta);
 
   rafId = requestAnimationFrame(gameLoop);
@@ -324,14 +316,9 @@ function renderFrame(delta: number): void {
     shakeRemaining,
   });
 
-  // Pause overlay (drawn first so settings can appear on top)
+  // Pause overlay
   if (isPaused) {
     renderPauseOverlay(ctx);
-  }
-
-  // Settings overlay (drawn last so it's on top when both are active)
-  if (showSettings) {
-    drawSettings(ctx, muted);
   }
 }
 
@@ -442,29 +429,6 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
   }
   if (scene !== 'playing' || !engine) return;
 
-  // Handle settings panel (if open)
-  if (showSettings) {
-    if (isSettingsClicked(pos.x, pos.y)) {
-      showSettings = false;
-      // Resume only if game was auto-paused by settings (not user-initiated)
-      if (pausedBySettings) {
-        pausedBySettings = false;
-        isPaused = false;
-        lastTime = performance.now();
-        rafId = requestAnimationFrame(gameLoop);
-      }
-      return;
-    }
-    if (isSoundToggleClicked(pos.x, pos.y)) {
-      muted = !muted;
-      setMuted(muted);
-      try { writeMuted(muted); } catch {}
-      return;
-    }
-    // Clicks outside sound toggle in settings panel do nothing
-    return;
-  }
-
   // Handle pause overlay — tap anywhere outside buttons to resume
   if (isPaused) {
     // Check if hit any HUD button
@@ -474,10 +438,6 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
     }
     if (isRestartClicked(pos.x, pos.y)) {
       startGame();
-      return;
-    }
-    if (isSettingsClicked(pos.x, pos.y)) {
-      showSettings = true;
       return;
     }
     if (isShakeClicked(pos.x, pos.y)) {
@@ -504,16 +464,6 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
     startGame();
     return;
   }
-  if (isSettingsClicked(pos.x, pos.y)) {
-    showSettings = true;
-    // Auto-pause the game when settings panel is open
-    if (!isPaused) {
-      isPaused = true;
-      pausedBySettings = true;
-      cancelAnimationFrame(rafId);
-    }
-    return;
-  }
   if (isMuteClicked(pos.x, pos.y)) {
     muted = !muted;
     setMuted(muted);
@@ -538,7 +488,7 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
 }
 
 function onPointerMove(e: MouseEvent | TouchEvent): void {
-  if (!isDragging || scene !== 'playing' || isPaused || showSettings) return;
+  if (!isDragging || scene !== 'playing' || isPaused) return;
   const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
   const worldX = pos.x - getContainerOffsetX(canvas);
   dragX = Math.max(readyHero ? readyHero.radius + 5 : 10, Math.min(CONTAINER_WIDTH - (readyHero ? readyHero.radius + 5 : 10), worldX));
@@ -546,7 +496,7 @@ function onPointerMove(e: MouseEvent | TouchEvent): void {
 }
 
 function onPointerUp(_e: MouseEvent | TouchEvent): void {
-  if (!isDragging || scene !== 'playing' || !engine || !readyHero || isPaused || showSettings) {
+  if (!isDragging || scene !== 'playing' || !engine || !readyHero || isPaused) {
     isDragging = false;
     return;
   }

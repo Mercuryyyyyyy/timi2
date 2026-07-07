@@ -1,5 +1,8 @@
 import { HERO_CHAIN, LS_MUTED } from '../constants';
 
+/** Audio asset base path, respects Vite's `--base` setting. */
+const BASE = import.meta.env.BASE_URL || '/';
+
 interface VoiceSet {
   files: string[];
 }
@@ -37,7 +40,7 @@ export async function initAudio(): Promise<void> {
 
   // Load voice manifest (await so preloads don't race)
   try {
-    const r = await fetch('/audio/voices.json');
+    const r = await fetch(`${BASE}audio/voices.json`);
     voiceData = await r.json();
   } catch {
     console.warn('voices.json not found, run download script');
@@ -66,7 +69,7 @@ export async function preloadHeroAudio(tier: number): Promise<void> {
     if (audioCache.has(cacheKey)) continue;
 
     try {
-      const response = await fetch(`/audio/${key}/${file}`);
+      const response = await fetch(`${BASE}audio/${key}/${file}`);
       const arrayBuffer = await response.arrayBuffer();
       if (audioContext) {
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -102,7 +105,7 @@ export function playHeroVoice(tier: number): void {
     playBuffer(cached);
   } else {
     // Load on demand
-    fetch(`/audio/${key}/${file}`)
+    fetch(`${BASE}audio/${key}/${file}`)
       .then(r => r.arrayBuffer())
       .then(buf => audioContext!.decodeAudioData(buf))
       .then(audioBuffer => {
@@ -148,7 +151,7 @@ export function stopBGM(): void {
 export async function playZhenjiBGM(): Promise<void> {
   if (isMuted || !audioContext) return;
   try {
-    const response = await fetch('/audio/zhenji/betray.wav');
+    const response = await fetch(`${BASE}audio/zhenji/betray.wav`);
     if (!response.ok) return;
     const buffer = await response.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(buffer);
@@ -160,7 +163,7 @@ export async function playZhenjiBGM(): Promise<void> {
 export async function playYaoSpecial(): Promise<void> {
   if (isMuted || !audioContext) return;
   try {
-    const resp = await fetch('/audio/yao/wow.wav');
+    const resp = await fetch(`${BASE}audio/yao/wow.wav`);
     if (resp.ok) {
       const buf = await resp.arrayBuffer();
       const audio = await audioContext.decodeAudioData(buf);
