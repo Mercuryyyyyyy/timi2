@@ -44,6 +44,11 @@ let rafId = 0;
 let ctx: CanvasRenderingContext2D | null = null;
 const deathTimers = new Map<number, number>();
 
+// Shake animation for game over
+let shakeStart = 0;
+let shakeX = 0;
+let shakeY = 0;
+
 // Drag-to-position preview state
 let readyHero: HeroDefinition | null = null;
 let dragX: number | null = null;
@@ -335,14 +340,34 @@ function endGame(): void {
   const leaderboard = insertLeaderboardEntry(score, hasYao);
   const isNewRecord = score >= highScore && score > 0;
 
-  if (ctx && engine) {
-  ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
-    renderBackground(ctx);
-    renderContainer(ctx);
-    const ox = getContainerOffsetX(canvas);
-    const oy = getContainerOffsetY();
-    renderHeroBodies(ctx, engine.world, ox, oy);
-    drawGameOver(ctx, score, isNewRecord, leaderboard);
+  // Start shake animation
+  shakeStart = performance.now();
+  shakeX = 0; shakeY = 0;
+  requestAnimationFrame(renderGameOver);
+
+  function renderGameOver(_ts: number): void {
+    if (scene !== 'gameover') return;
+    const elapsed = performance.now() - shakeStart;
+    const duration = 600; // shake lasts 600ms
+    if (elapsed < duration) {
+      const decay = 1 - elapsed / duration;
+      const intensity = 8 * decay;
+      shakeX = (Math.random() - 0.5) * intensity * 2;
+      shakeY = (Math.random() - 0.5) * intensity * 2;
+      requestAnimationFrame(renderGameOver);
+    } else {
+      shakeX = 0; shakeY = 0;
+    }
+
+    if (ctx && engine) {
+      ctx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT + HUD_HEIGHT);
+      renderBackground(ctx);
+      renderContainer(ctx);
+      const ox = getContainerOffsetX(canvas);
+      const oy = getContainerOffsetY();
+      renderHeroBodies(ctx, engine.world, ox, oy);
+      drawGameOver(ctx, score, isNewRecord, leaderboard, shakeX, shakeY);
+    }
   }
 }
 

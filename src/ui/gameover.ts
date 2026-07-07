@@ -1,17 +1,20 @@
-import { CONTAINER_WIDTH, CONTAINER_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, COLOR_OVERLAY, type LeaderboardEntry } from '../constants';
+import { CONTAINER_WIDTH, CONTAINER_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, type LeaderboardEntry } from '../constants';
 
 /** Module-level cache of the button Y computed during the last drawGameOver call, used by hit-test functions. */
 let lastButtonY = 0;
 
-export function drawGameOver(ctx: CanvasRenderingContext2D, score: number, isNewRecord: boolean, leaderboard: LeaderboardEntry[]): void {
-  // Semi-transparent overlay
+export function drawGameOver(ctx: CanvasRenderingContext2D, score: number, isNewRecord: boolean, leaderboard: LeaderboardEntry[], shakeX: number = 0, shakeY: number = 0): void {
+  // Light blue gradient overlay
   ctx.save();
-  ctx.fillStyle = COLOR_OVERLAY;
+  const grad = ctx.createLinearGradient(0, 0, 0, CONTAINER_HEIGHT);
+  grad.addColorStop(0, 'rgba(173, 216, 230, 0.92)');  // lightblue
+  grad.addColorStop(1, 'rgba(135, 206, 250, 0.92)');  // lightskyblue
+  ctx.fillStyle = grad;
   ctx.fillRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT);
   ctx.restore();
 
-  const cx = CONTAINER_WIDTH / 2;
-  let y = 120;
+  const cx = CONTAINER_WIDTH / 2 + shakeX;
+  let y = 120 + shakeY;
 
   // Game Over title
   ctx.save();
