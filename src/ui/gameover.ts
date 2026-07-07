@@ -3,35 +3,21 @@ import { CONTAINER_WIDTH, CONTAINER_HEIGHT, HUD_HEIGHT, COLOR_ACCENT, COLOR_WHIT
 // ---------------------------------------------------------------------------
 // Layout constants
 // ---------------------------------------------------------------------------
-const FULL_H = CONTAINER_HEIGHT + HUD_HEIGHT;
-const CX = CONTAINER_WIDTH / 2;
-const CARD_W = 270;
-const CARD_R = 14;
-const CARD_PAD = 14;
+const FULL_H = CONTAINER_HEIGHT + HUD_HEIGHT;   // 580
+const CX = CONTAINER_WIDTH / 2;                  // 180
+const CARD_W = 270;                              // card width
+const CARD_R = 14;                               // card corner radius
+const CARD_BG = 'rgba(255, 255, 255, 0.82)';    // card fill
 
 /** Module-level cache of button positions computed during the last drawGameOver call, used by hit-test. */
-let lastReplayBtn = { x: 0, y: 0, w: 0, h: 0 };
-let lastHomeBtn = { x: 0, y: 0, w: 0, h: 0 };
+let lastReplayBtn: { x: number; y: number; w: number; h: number } | null = null;
+let lastHomeBtn: { x: number; y: number; w: number; h: number } | null = null;
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Draw a round-rect card background. */
-function card(ctx: CanvasRenderingContext2D, y: number, h: number): number {
-  const x = CX - CARD_W / 2;
-  ctx.save();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.shadowColor = 'rgba(0,0,0,0.08)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 2;
-  roundRect(ctx, x, y, CARD_W, h, CARD_R);
-  ctx.fill();
-  ctx.restore();
-  return x; // card-left for content alignment
-}
-
-/** Simple round-rect path (no fill/stroke). */
+/** Round-rect path. */
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -46,17 +32,15 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** Draw a label + value pair horizontally centered within a card. */
-function statPair(ctx: CanvasRenderingContext2D, label: string, value: string, x: number, y: number): void {
+/** Draw a round-rect card at (x,y) with given height. */
+function card(ctx: CanvasRenderingContext2D, x: number, y: number, h: number): void {
   ctx.save();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.font = `11px ${FONT_STACK}`;
-  ctx.fillStyle = '#999';
-  ctx.fillText(label, x, y);
-  ctx.font = `bold 20px ${FONT_STACK}`;
-  ctx.fillStyle = '#333';
-  ctx.fillText(value, x, y + 16);
+  ctx.fillStyle = CARD_BG;
+  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 2;
+  roundRect(ctx, x, y, CARD_W, h, CARD_R);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -81,98 +65,113 @@ export function drawGameOver(
   ctx.fillRect(0, 0, CONTAINER_WIDTH, FULL_H);
   ctx.restore();
 
-  let y = 50;
+  let y = 48;
 
   // ── Title ─────────────────────────────────────────────────────
   ctx.save();
   ctx.font = `bold 34px ${FONT_STACK}`;
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
   ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
   ctx.shadowColor = 'rgba(233,30,99,0.35)';
   ctx.shadowBlur = 10;
   ctx.shadowOffsetY = 2;
-  ctx.fillText('游戏结束', CX, y + 34); // y + fontSize roughly
+  ctx.fillText('游戏结束', CX, y);
   ctx.restore();
-  y += 55;
+  y += 50;
 
   // ── Score card ────────────────────────────────────────────────
-  const card1H = 78;
-  card(ctx, y, card1H);
-  const cl = CX - CARD_W / 2;
+  // Card: 270×100, centered
+  const card1H = 100;
+  const cx1 = CX - CARD_W / 2;
+  card(ctx, cx1, y, card1H);
 
-  // Score label
+  // "最终得分" label
   ctx.save();
   ctx.font = `12px ${FONT_STACK}`;
-  ctx.fillStyle = '#999';
-  ctx.textAlign = 'center';
-  ctx.fillText('最终得分', CX, y + CARD_PAD);
-  ctx.restore();
-
-  // Score number (formatted with commas)
-  const scoreStr = score.toLocaleString('zh-CN');
-  ctx.save();
-  ctx.font = `bold 48px ${FONT_STACK}`;
-  ctx.fillStyle = COLOR_ACCENT;
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(233,30,99,0.15)';
-  ctx.shadowBlur = 4;
-  ctx.fillText(scoreStr, CX, y + 30);
-  ctx.restore();
-
-  // "分" after the score
-  ctx.save();
-  ctx.font = `13px ${FONT_STACK}`;
   ctx.fillStyle = '#aaa';
   ctx.textAlign = 'center';
-  ctx.fillText('分', CX, y + 62);
+  ctx.textBaseline = 'top';
+  ctx.fillText('最终得分', CX, y + 16);
   ctx.restore();
-  y += card1H + 10;
+
+  // Score number (with thousands separator)
+  ctx.save();
+  ctx.font = `bold 44px ${FONT_STACK}`;
+  ctx.fillStyle = COLOR_ACCENT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.shadowColor = 'rgba(233,30,99,0.12)';
+  ctx.shadowBlur = 4;
+  ctx.fillText(score.toLocaleString('zh-CN'), CX, y + 30);
+  ctx.restore();
+
+  // "分" after score
+  ctx.save();
+  ctx.font = `12px ${FONT_STACK}`;
+  ctx.fillStyle = '#bbb';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText('分', CX, y + 80);
+  ctx.restore();
+  y += card1H + 12;
 
   // ── New record badge ──────────────────────────────────────────
   if (isNewRecord) {
+    const bw = 128, bh = 28;
+    const bx = CX - bw / 2;
+    const by = y;
     ctx.save();
-    ctx.font = `bold 14px ${FONT_STACK}`;
+    const bg = ctx.createLinearGradient(bx, by, bx, by + bh);
+    bg.addColorStop(0, '#ffd700');
+    bg.addColorStop(1, '#ffb300');
+    ctx.fillStyle = bg;
+    roundRect(ctx, bx, by, bw, bh, bh / 2);
+    ctx.fill();
+    ctx.font = `bold 13px ${FONT_STACK}`;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
-    // Pill background
-    const badgeW = 130;
-    const badgeX = CX - badgeW / 2;
-    const badgeY = y;
-    const badgeH = 26;
-    const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
-    badgeGrad.addColorStop(0, '#ffd700');
-    badgeGrad.addColorStop(1, '#ffb300');
-    ctx.fillStyle = badgeGrad;
-    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = `bold 13px ${FONT_STACK}`;
-    ctx.fillText('🎉 新纪录！', CX, badgeY + 18);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🎉 新纪录！', CX, by + bh / 2);
     ctx.restore();
-    y += 36;
+    y += bh + 10;
   } else {
-    y += 6;
+    y += 8;
   }
 
-  // ── Stats card ────────────────────────────────────────────────
-  const card2H = 52;
-  card(ctx, y, card2H);
+  // ── Stats row (2 columns in a card) ───────────────────────────
+  const card2H = 50;
+  const cx2 = CX - CARD_W / 2;
+  card(ctx, cx2, y, card2H);
   const hero = getHeroByTier(highestTier);
-  statPair(ctx, '合成次数  ', String(mergeCount), CX - CARD_W / 4, y + CARD_PAD - 2);
-  statPair(ctx, '最高级别  ', hero ? hero.nameZh : String(highestTier), CX + CARD_W / 4, y + CARD_PAD - 2);
-  y += card2H + 10;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.font = `11px ${FONT_STACK}`;
+  ctx.fillStyle = '#999';
+  ctx.fillText('合成次数', cx2 + CARD_W * 0.25, y + 10);
+  ctx.fillText('最高级别', cx2 + CARD_W * 0.75, y + 10);
+  ctx.font = `bold 18px ${FONT_STACK}`;
+  ctx.fillStyle = '#333';
+  ctx.fillText(String(mergeCount), cx2 + CARD_W * 0.25, y + 24);
+  ctx.fillText(hero ? hero.nameZh : String(highestTier), cx2 + CARD_W * 0.75, y + 24);
+  ctx.restore();
+  y += card2H + 12;
 
   // ── Leaderboard card ──────────────────────────────────────────
-  const lbRows = leaderboard.length || 1;
-  const lbH = 34 + lbRows * 20 + CARD_PAD; // header + rows + pad
-  card(ctx, y, lbH);
+  const lbRows = Math.max(leaderboard.length, 1);
+  const lbH = 26 + lbRows * 22 + 12; // header gap + rows + bottom padding
+  const cx3 = CX - CARD_W / 2;
+  card(ctx, cx3, y, lbH);
 
   // Header
   ctx.save();
   ctx.font = `bold 13px ${FONT_STACK}`;
-  ctx.fillStyle = '#666';
+  ctx.fillStyle = '#555';
   ctx.textAlign = 'center';
-  ctx.fillText('🏆 排行榜', CX, y + CARD_PAD + 6);
+  ctx.textBaseline = 'top';
+  ctx.fillText('🏆 排行榜', CX, y + 8);
   ctx.restore();
 
   if (leaderboard.length === 0) {
@@ -180,50 +179,54 @@ export function drawGameOver(
     ctx.font = `12px ${FONT_STACK}`;
     ctx.fillStyle = '#999';
     ctx.textAlign = 'center';
-    ctx.fillText('暂无记录', CX, y + CARD_PAD + 28);
+    ctx.textBaseline = 'top';
+    ctx.fillText('暂无记录', CX, y + 30);
     ctx.restore();
   } else {
-    const rowY = y + CARD_PAD + 24;
+    const RANK_CLR = ['#e91e63', '#ff9800', '#4caf50', '#999', '#999'];
+    const rowY = y + 28;
     for (let i = 0; i < leaderboard.length; i++) {
       const entry = leaderboard[i];
-      const ry = rowY + i * 20;
-      // Rank number with medal colors
+      const ry = rowY + i * 22;
+
       ctx.save();
+      ctx.textBaseline = 'top';
+
+      // Rank
       ctx.font = `bold 12px ${FONT_STACK}`;
+      ctx.fillStyle = RANK_CLR[i] ?? '#999';
       ctx.textAlign = 'left';
-      const rankColors = ['#e91e63', '#ff9800', '#4caf50', '#999', '#999'];
-      ctx.fillStyle = rankColors[i] || '#999';
-      ctx.fillText(`#${i + 1}`, cl + CARD_PAD, ry);
+      ctx.fillText(`#${i + 1}`, cx3 + 14, ry);
+
       // Score
       ctx.font = `13px ${FONT_STACK}`;
       ctx.fillStyle = '#333';
-      ctx.fillText(`${entry.score}分`, cl + 40, ry);
-      // Date
+      ctx.fillText(`${entry.score}分`, cx3 + 42, ry);
+
+      // Date (right-aligned)
       ctx.font = `11px ${FONT_STACK}`;
       ctx.fillStyle = '#bbb';
-      ctx.fillText(entry.date, cl + CARD_W - CARD_PAD - 52, ry);
-      // Yao mark
-      if (entry.hasYao) {
-        ctx.font = `12px ${FONT_STACK}`;
-        ctx.fillStyle = '#ff69b4';
-        ctx.textAlign = 'right';
-        ctx.fillText('🌸', cl + CARD_W - CARD_PAD, ry);
-      }
+      ctx.textAlign = 'right';
+      ctx.fillText(entry.date, cx3 + CARD_W - 14, ry);
+
       ctx.restore();
     }
   }
-  y += lbH + 12;
+  y += lbH + 14;
 
   // ── Buttons ───────────────────────────────────────────────────
-  const btnW = 110;
-  const btnH = 40;
-  const btnGap = 20;
+  const btnW = 120;
+  const btnH = 42;
+  const gap = 16;
 
-  lastReplayBtn = { x: CX - btnW - btnGap / 2, y, w: btnW, h: btnH };
-  lastHomeBtn  = { x: CX + btnGap / 2, y, w: btnW, h: btnH };
+  const replayX = CX - btnW - gap / 2;
+  const homeX = CX + gap / 2;
 
-  drawButton(ctx, '再来一局', lastReplayBtn.x, lastReplayBtn.y, btnW, btnH);
-  drawButton(ctx, '返回首页', lastHomeBtn.x, lastHomeBtn.y, btnW, btnH);
+  lastReplayBtn = { x: replayX, y, w: btnW, h: btnH };
+  lastHomeBtn  = { x: homeX, y, w: btnW, h: btnH };
+
+  drawButton(ctx, '再来一局', replayX, y, btnW, btnH);
+  drawButton(ctx, '返回首页', homeX, y, btnW, btnH);
 }
 
 // ---------------------------------------------------------------------------
@@ -232,18 +235,15 @@ export function drawGameOver(
 
 function drawButton(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, w: number, h: number): void {
   ctx.save();
-  // Shadow
   ctx.shadowColor = 'rgba(233,30,99,0.25)';
   ctx.shadowBlur = 8;
   ctx.shadowOffsetY = 2;
-  // Gradient fill
   const grad = ctx.createLinearGradient(x, y, x, y + h);
   grad.addColorStop(0, '#f48fb1');
   grad.addColorStop(1, COLOR_ACCENT);
   ctx.fillStyle = grad;
   roundRect(ctx, x, y, w, h, h / 2);
   ctx.fill();
-  // Text
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
@@ -260,11 +260,13 @@ function drawButton(ctx: CanvasRenderingContext2D, text: string, x: number, y: n
 // ---------------------------------------------------------------------------
 
 export function isReplayClicked(x: number, y: number): boolean {
+  if (!lastReplayBtn) return false;
   const b = lastReplayBtn;
   return x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
 }
 
 export function isHomeClicked(x: number, y: number): boolean {
+  if (!lastHomeBtn) return false;
   const b = lastHomeBtn;
   return x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
 }
