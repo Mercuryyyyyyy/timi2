@@ -11,7 +11,7 @@ import {
   setDropPreview, renderDropPreview,
   triggerButterflyBloom, updateAndDrawButterflies, clearButterflies,
   renderPauseOverlay,
-  isPauseClicked, isRestartClicked, isSettingsClicked, isMuteClicked,
+  isPauseClicked, isRestartClicked, isSettingsClicked, isMuteClicked, isShakeClicked,
   spawnScorePop, updateAndDrawScorePops, clearScorePops,
 } from './rendering/canvas';
 import {
@@ -46,6 +46,10 @@ const deathTimers = new Map<number, number>();
 
 // Shake animation for game over
 let shakeStart = 0;
+
+// Shake button cooldown
+let lastShakeTime = 0;
+const SHAKE_COOLDOWN_MS = 400;
 
 // Drag-to-position preview state
 let readyHero: HeroDefinition | null = null;
@@ -143,6 +147,24 @@ function togglePause(): void {
   } else {
     lastTime = performance.now();
     rafId = requestAnimationFrame(gameLoop);
+  }
+}
+
+/** Shake all hero bodies with a gentle upward bump. */
+function doShake(): void {
+  if (!engine) return;
+  const now = performance.now();
+  if (now - lastShakeTime < SHAKE_COOLDOWN_MS) return;
+  lastShakeTime = now;
+
+  const bodies = getHeroBodies(engine.world);
+  for (const body of bodies) {
+    if (body.isStatic) continue;
+    const impulse = {
+      x: (Math.random() - 0.5) * 0.8,
+      y: -(1.5 + Math.random() * 2.0),
+    };
+    Matter.Body.applyForce(body, body.position, impulse);
   }
 }
 
@@ -444,6 +466,10 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
       showSettings = true;
       return;
     }
+    if (isShakeClicked(pos.x, pos.y)) {
+      doShake();
+      return;
+    }
     if (isMuteClicked(pos.x, pos.y)) {
       muted = !muted;
       setMuted(muted);
@@ -478,6 +504,10 @@ function onPointerDown(e: MouseEvent | TouchEvent): void {
     muted = !muted;
     setMuted(muted);
     try { writeMuted(muted); } catch {}
+    return;
+  }
+  if (isShakeClicked(pos.x, pos.y)) {
+    doShake();
     return;
   }
 

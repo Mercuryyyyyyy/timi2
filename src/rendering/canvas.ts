@@ -346,11 +346,13 @@ export function clearButterflies(): void {
 // ---------------------------------------------------------------------------
 
 const HUD_BUTTON_RADIUS = 18;
-const BUTTON_START_X = CONTAINER_WIDTH - 4 * (HUD_BUTTON_RADIUS * 2 + 6);
-const BUTTON_PAUSE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 3;
-const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_RADIUS * 2 + 6;
-const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_RADIUS * 2 + 6;
-const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_RADIUS * 2 + 6;
+const HUD_BUTTON_SLOT = HUD_BUTTON_RADIUS * 2 + 6; // diameter + gap
+const BUTTON_START_X = CONTAINER_WIDTH - 5 * HUD_BUTTON_SLOT;
+const BUTTON_SHAKE_CX = BUTTON_START_X + HUD_BUTTON_RADIUS + 3;
+const BUTTON_PAUSE_CX = BUTTON_SHAKE_CX + HUD_BUTTON_SLOT;
+const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_SLOT;
+const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_SLOT;
+const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_SLOT;
 
 function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string): void {
   ctx.save();
@@ -400,7 +402,8 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.fillText(`🏆 ${data.score}`, 12, cy);
   ctx.restore();
 
-  // Render HUD buttons (pause, restart, settings, mute)
+  // Render HUD buttons (shake, pause, restart, settings, mute)
+  drawHUDButton(ctx, BUTTON_SHAKE_CX, cy, '💥');
   drawHUDButton(ctx, BUTTON_PAUSE_CX, cy, data.isPaused ? '▶' : '⏸');
   drawHUDButton(ctx, BUTTON_RESTART_CX, cy, '🔄');
   drawHUDButton(ctx, BUTTON_SETTINGS_CX, cy, '⚙');
@@ -413,6 +416,10 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
 
 function isInsideButton(x: number, y: number, cx: number, cy: number, r: number): boolean {
   return y >= 0 && y < HUD_HEIGHT && Math.abs(x - cx) <= r && Math.abs(y - cy) <= r;
+}
+
+export function isShakeClicked(x: number, y: number): boolean {
+  return isInsideButton(x, y, BUTTON_SHAKE_CX, HUD_HEIGHT / 2, HUD_BUTTON_RADIUS);
 }
 
 export function isPauseClicked(x: number, y: number): boolean {
