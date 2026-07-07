@@ -103,47 +103,53 @@ function showMenu(): void {
 // Scene: Playing
 // ---------------------------------------------------------------------------
 async function startGame(): Promise<void> {
-  // Cancel any running game loop and prevent the old loop from continuing
-  cancelAnimationFrame(rafId);
-  scene = 'loading';
-  score = 0;
-  hasYao = false;
-  isPaused = false;
-  highestTier = 1;
-  mergeCount = 0;
-  isDragging = false;
-  dragX = null;
-  setDropPreview(null);
-  deathTimers.clear();
-  shakeGraceUntil = 0;
-  shakeRemaining = 3;
-  clearAnimations();
-  clearButterflies();
-  clearScorePops();
-  try { highScore = readHighScore(); } catch { highScore = 0; }
-  try { muted = readMuted(); } catch { muted = false; }
+  try {
+    // Cancel any running game loop and prevent the old loop from continuing
+    cancelAnimationFrame(rafId);
+    scene = 'loading';
+    score = 0;
+    hasYao = false;
+    isPaused = false;
+    highestTier = 1;
+    mergeCount = 0;
+    isDragging = false;
+    dragX = null;
+    setDropPreview(null);
+    deathTimers.clear();
+    shakeGraceUntil = 0;
+    shakeRemaining = 3;
+    clearAnimations();
+    clearButterflies();
+    clearScorePops();
+    try { highScore = readHighScore(); } catch { highScore = 0; }
+    try { muted = readMuted(); } catch { muted = false; }
 
-  engine = createPhysicsEngine();
+    engine = createPhysicsEngine();
 
-  await initAudio();
-  resumeAudio();
-  setMuted(muted);
-  playBGM();
+    await initAudio();
+    resumeAudio();
+    setMuted(muted);
+    playBGM();
 
-  // Preload hero images (blocks until all loaded)
-  await preloadHeroImages();
+    // Preload hero images (blocks until all loaded)
+    await preloadHeroImages();
 
-  // Preload audio for common tiers 1-4 synchronously (80%+ of spawns)
-  for (let t = 1; t <= 4; t++) await preloadHeroAudio(t);
-  // Higher tiers load in background
-  preloadAllAudio();
+    // Preload audio for common tiers 1-4 synchronously (80%+ of spawns)
+    for (let t = 1; t <= 4; t++) await preloadHeroAudio(t);
+    // Higher tiers load in background
+    preloadAllAudio();
 
-  // Initialize first hero preview
-  readyHero = consumeNextHero();
+    // Initialize first hero preview
+    readyHero = consumeNextHero();
 
-  scene = 'playing';
-  lastTime = performance.now();
-  rafId = requestAnimationFrame(gameLoop);
+    scene = 'playing';
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(gameLoop);
+  } catch {
+    // If startup fails (network error, etc.), fall back to menu
+    engine = null;
+    showMenu();
+  }
 }
 
 function togglePause(): void {
