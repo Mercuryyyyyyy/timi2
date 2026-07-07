@@ -354,9 +354,10 @@ const BUTTON_RESTART_CX = BUTTON_PAUSE_CX + HUD_BUTTON_SLOT;
 const BUTTON_SETTINGS_CX = BUTTON_RESTART_CX + HUD_BUTTON_SLOT;
 const BUTTON_MUTE_CX = BUTTON_SETTINGS_CX + HUD_BUTTON_SLOT;
 
-function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string): void {
+function drawHUDButton(ctx: CanvasRenderingContext2D, cx: number, cy: number, emoji: string, disabled = false): void {
   ctx.save();
   ctx.font = `16px ${FONT_STACK}`;
+  ctx.fillStyle = disabled ? 'rgba(150,150,150,0.5)' : '#333';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(emoji, cx, cy);
@@ -373,8 +374,9 @@ export interface HUDData {
   nextTier?: number;
   isMuted: boolean;
   isPaused: boolean;
-  highestTierName: string; // name of highest tier merged so far
-  mergeCount: number;      // total number of merges
+  highestTierName: string;
+  mergeCount: number;
+  shakeRemaining: number;
 }
 
 export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
@@ -403,7 +405,17 @@ export function renderHUD(ctx: CanvasRenderingContext2D, data: HUDData): void {
   ctx.restore();
 
   // Render HUD buttons (shake, pause, restart, settings, mute)
-  drawHUDButton(ctx, BUTTON_SHAKE_CX, cy, '💥');
+  drawHUDButton(ctx, BUTTON_SHAKE_CX, cy, '💥', data.shakeRemaining <= 0);
+  // Shake remaining count badge
+  if (data.shakeRemaining > 0) {
+    ctx.save();
+    ctx.font = `bold 10px ${FONT_STACK}`;
+    ctx.fillStyle = COLOR_ACCENT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(data.shakeRemaining), BUTTON_SHAKE_CX + 18, cy - 12);
+    ctx.restore();
+  }
   drawHUDButton(ctx, BUTTON_PAUSE_CX, cy, data.isPaused ? '▶' : '⏸');
   drawHUDButton(ctx, BUTTON_RESTART_CX, cy, '🔄');
   drawHUDButton(ctx, BUTTON_SETTINGS_CX, cy, '⚙');

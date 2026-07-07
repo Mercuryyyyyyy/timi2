@@ -50,6 +50,7 @@ let shakeStart = 0;
 // Shake button cooldown
 let lastShakeTime = 0;
 const SHAKE_COOLDOWN_MS = 400;
+let shakeRemaining = 3;
 
 // Game-over grace period after manual shake (ms)
 let shakeGraceUntil = 0;
@@ -120,6 +121,7 @@ async function startGame(): Promise<void> {
   setDropPreview(null);
   deathTimers.clear();
   shakeGraceUntil = 0;
+  shakeRemaining = 3;
   clearAnimations();
   clearButterflies();
   clearScorePops();
@@ -157,10 +159,11 @@ function togglePause(): void {
 
 /** Shake all hero bodies with a gentle upward bump. */
 function doShake(): void {
-  if (!engine) return;
+  if (!engine || shakeRemaining <= 0) return;
   const now = performance.now();
   if (now - lastShakeTime < SHAKE_COOLDOWN_MS) return;
   lastShakeTime = now;
+  shakeRemaining--;
 
   // Suppress game-over detection during shake settle
   shakeGraceUntil = now + SHAKE_GRACE_MS;
@@ -170,7 +173,7 @@ function doShake(): void {
     if (body.isStatic) continue;
     const impulse = {
       x: (Math.random() - 0.5) * 0.4,
-      y: -(0.3 + Math.random() * 0.5),
+      y: -(0.2 + Math.random() * 0.2),
     };
     Matter.Body.applyForce(body, body.position, impulse);
   }
@@ -318,6 +321,7 @@ function renderFrame(delta: number): void {
     isPaused,
     highestTierName,
     mergeCount,
+    shakeRemaining,
   });
 
   // Pause overlay (drawn first so settings can appear on top)
