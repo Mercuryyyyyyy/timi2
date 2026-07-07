@@ -1,13 +1,17 @@
-import { CONTAINER_WIDTH, CONTAINER_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, type LeaderboardEntry } from '../constants';
+import { CONTAINER_WIDTH, CONTAINER_HEIGHT, HUD_HEIGHT, FONT_STACK, COLOR_ACCENT, COLOR_WHITE, type LeaderboardEntry } from '../constants';
 
 /** Module-level cache of the button Y computed during the last drawGameOver call, used by hit-test functions. */
 let lastButtonY = 0;
 
 export function drawGameOver(ctx: CanvasRenderingContext2D, score: number, isNewRecord: boolean, leaderboard: LeaderboardEntry[]): void {
-  // Opaque light blue full cover
+  // Light pink gradient full cover (entire canvas including HUD)
   ctx.save();
-  ctx.fillStyle = '#add8e6';  // solid lightblue
-  ctx.fillRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT);
+  const fullH = CONTAINER_HEIGHT + HUD_HEIGHT;
+  const grad = ctx.createLinearGradient(0, 0, 0, fullH);
+  grad.addColorStop(0, '#fce4ec');  // light pink (matches background)
+  grad.addColorStop(1, '#f8bbd0');  // deeper pink (matches container)
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, CONTAINER_WIDTH, fullH);
   ctx.restore();
 
   const cx = CONTAINER_WIDTH / 2;
