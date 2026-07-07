@@ -7,27 +7,40 @@ import {
 } from '../constants';
 import { getHeroBodies } from '../engine/physics';
 
+/** Base URL for assets, respects Vite's `--base`. */
+const BASE = import.meta.env.BASE_URL || '/';
+
 // ---------------------------------------------------------------------------
-// Image cache
+// Image cache — preloaded at startup
 // ---------------------------------------------------------------------------
 
-// Simple image cache — load on first use
-const heroImageCache = new Map<string, HTMLImageElement>();
+const heroImageCache = new Map<number, HTMLImageElement>();
 
-function getHeroImg(tier: number, nameEn: string): HTMLImageElement | null {
-  const basePath = getHeroImagePath(tier, nameEn);
-  // Try .jpg first (most common), then .png
-  for (const ext of ['.jpg', '.png']) {
-    const key = basePath + ext;
-    let img = heroImageCache.get(key);
-    if (!img) {
-      img = new Image();
-      img.src = key;
-      heroImageCache.set(key, img);
-    }
-    if (img.complete && img.naturalWidth > 0) return img;
-  }
-  return null;
+/** Preload all hero images (tries .jpg then .png). Call once during startGame. */
+export function preloadHeroImages(): Promise<void[]> {
+  return Promise.all(
+    HERO_CHAIN.map((hero) => {
+      return new Promise<void>((resolve) => {
+        const basePath = getHeroImagePath(hero.tier, hero.nameEn);
+        for (const ext of ['.jpg', '.png']) {
+          const key = BASE + basePath + ext;
+          const img = new Image();
+          img.onload = () => {
+            heroImageCache.set(hero.tier, img);
+            resolve();
+          };
+          img.onerror = () => {}; // try next extension
+          img.src = key;
+        }
+        // Fallback after 3s if neither loaded
+        setTimeout(resolve, 3000);
+      });
+    }),
+  );
+}
+
+function getHeroImg(tier: number): HTMLImageElement | null {
+  return heroImageCache.get(tier) ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -79,7 +92,7 @@ export function renderDropPreview(ctx: CanvasRenderingContext2D, ox: number, oy:
   ctx.globalAlpha = isDragging ? 0.45 : 0.85;
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
-  const img = getHeroImg(hero.tier, hero.nameEn);
+  const img = getHeroImg(hero.tier);
   if (img) {
     ctx.clip();
     ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
@@ -185,7 +198,7 @@ export function renderHeroBodies(
     if (!heroDef) continue;
 
     const r = heroDef.radius;
-    const img = getHeroImg(tier, heroDef.nameEn);
+    const img = getHeroImg(tier);
 
     // Merge squish animation scale
     let scale = 1;

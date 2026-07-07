@@ -10,7 +10,7 @@ import {
   getContainerOffsetX, getContainerOffsetY, isInsideContainer, animateMerge,
   setDropPreview, renderDropPreview,
   triggerButterflyBloom, updateAndDrawButterflies, clearButterflies,
-  renderPauseOverlay,
+  renderPauseOverlay, preloadHeroImages,
   isPauseClicked, isRestartClicked, isMuteClicked, isShakeClicked,
   spawnScorePop, updateAndDrawScorePops, clearScorePops,
 } from './rendering/canvas';
@@ -130,7 +130,10 @@ async function startGame(): Promise<void> {
   setMuted(muted);
   playBGM();
 
-  // Preload initial voice data
+  // Preload hero images (blocks until all loaded)
+  await preloadHeroImages();
+
+  // Preload voice data in background
   preloadAllAudio();
 
   // Initialize first hero preview
@@ -416,6 +419,7 @@ function getCanvasCoords(e: MouseEvent | Touch): { x: number; y: number } {
 
 function onPointerDown(e: MouseEvent | TouchEvent): void {
   e.preventDefault();
+  resumeAudio(); // keep AudioContext alive
   const pos = e instanceof MouseEvent ? getCanvasCoords(e) : getCanvasCoords((e as TouchEvent).touches[0]);
 
   if (scene === 'menu') {

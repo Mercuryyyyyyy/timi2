@@ -118,6 +118,10 @@ export function playHeroVoice(tier: number): void {
 
 function playBuffer(buffer: AudioBuffer): void {
   if (!audioContext || isMuted) return;
+  // Ensure context is running (browsers may suspend it)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
   const source = audioContext.createBufferSource();
   source.buffer = buffer;
 
