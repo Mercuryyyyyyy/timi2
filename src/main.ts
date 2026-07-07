@@ -373,7 +373,7 @@ function endGame(): void {
         const oy = getContainerOffsetY();
         renderHeroBodies(ctx, engine.world, ox, oy);
       }
-      drawGameOver(ctx, score, isNewRecord, leaderboard);
+      drawGameOver(ctx, score, isNewRecord, leaderboard, mergeCount, highestTier);
     }
   }
 }
