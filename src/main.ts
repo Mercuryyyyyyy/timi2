@@ -508,6 +508,53 @@ window.addEventListener('mouseup', () => {
 
 window.addEventListener('resize', resizeCanvas);
 
+// Dev shortcuts for testing (keyboard only, not in production)
+window.addEventListener('keydown', (e) => {
+  if (scene !== 'playing' || !engine) return;
+
+  // 1-9: spawn specific tier hero at random X
+  const tier = parseInt(e.key);
+  if (tier >= 1 && tier <= 9) {
+    const hero = HERO_CHAIN.find(h => h.tier === tier);
+    if (hero) {
+      const sx = 40 + Math.random() * (CONTAINER_WIDTH - 80);
+      createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: sx, y: -20 });
+    }
+    return;
+  }
+
+  // 0: spawn two 瑶 on top of each other (test butterfly + yao merge)
+  if (e.key === '0') {
+    const hero = HERO_CHAIN[10]; // 瑶
+    createHeroBody(engine.world, { tier: 11, nameZh: hero.nameZh, radius: hero.radius, x: CONTAINER_WIDTH / 2 - 20, y: 200 });
+    createHeroBody(engine.world, { tier: 11, nameZh: hero.nameZh, radius: hero.radius, x: CONTAINER_WIDTH / 2 + 20, y: 200 });
+    return;
+  }
+
+  // G: fill container to trigger game over
+  if (e.key === 'g' || e.key === 'G') {
+    for (let i = 0; i < 5; i++) {
+      const hero = HERO_CHAIN[Math.floor(Math.random() * 4)];
+      createHeroBody(engine.world, { tier: hero.tier, nameZh: hero.nameZh, radius: hero.radius, x: 50 + Math.random() * 260, y: 10 + Math.random() * 30 });
+    }
+    return;
+  }
+
+  // S: add 1000 score
+  if (e.key === 's' || e.key === 'S') {
+    score += 1000;
+    return;
+  }
+
+  // R: restart
+  if (e.key === 'r' || e.key === 'R') {
+    startGame();
+    return;
+  }
+});
+
+resizeCanvas();
+
 ctx = canvas.getContext('2d');
 if (!ctx) throw new Error('Cannot get 2D context');
 resizeCanvas();
